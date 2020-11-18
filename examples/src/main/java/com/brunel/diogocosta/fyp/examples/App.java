@@ -10,13 +10,14 @@ import java.util.stream.Collectors;
 
 public class App {
     private static Logger logger;
-    private static final Integer SEQUENCE_SIZE = 10000;
+    private static final Integer SEQUENCE_SIZE = 100000;
 
     public static void main(String[] args) {
         logger = Logger.getGlobal();
 
         logger.fine("Hello World!");
 
+        timeAndExecuteFunction(() -> generateSequence(), "generateSequence");
         ArrayList<Integer> sequence = generateSequence();
 
         logger.info("--- ITERATING ARRAYLIST ---");
@@ -24,7 +25,6 @@ public class App {
         timeAndExecuteFunction(() -> forEachIterate(sequence), "forEachIterate");
         timeAndExecuteFunction(() -> whileIterate(sequence), "whileIterate");
         timeAndExecuteFunction(() -> whileIterator(sequence), "whileIterator");
-        timeAndExecuteFunction(() -> whileListIterator(sequence), "whileListIterator");
         timeAndExecuteFunction(() -> functionalForEachIterate(sequence), "functionalForEachIterate");
         timeAndExecuteFunction(() -> functionalStreamForEachIterate(sequence), "functionalStreamForEachIterate");
 
@@ -61,19 +61,12 @@ public class App {
         }
     }
 
-    private static void whileListIterator(ArrayList<Integer> list) {
+    private static void whileIterate(ArrayList<Integer> list) {
         int i = 0;
         while (i < list.size()) {
             String number = valueOf(list.get(i));
             logger.finest(number);
             i++;
-        }
-    }
-
-    private static void whileIterate(ArrayList<Integer> list) {
-        for (int i = 0; i < list.size(); i++) {
-            String number = valueOf(list.get(i));
-            logger.finest(number);
         }
     }
 
@@ -150,11 +143,12 @@ public class App {
             runnable.run();
             long endTime = System.currentTimeMillis();
 
-            long duration = endTime - startTime;
+            double duration = endTime - startTime;
 
-            String output = String.format("%s: %d milliseconds", logPrefix, duration);
+            String output = String.format("%s: %f milliseconds", logPrefix, duration);
 
             logger.info(output);
+
         } catch (Exception e) {
             logger.severe(e.getMessage());
         }
