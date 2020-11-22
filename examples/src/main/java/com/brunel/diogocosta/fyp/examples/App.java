@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 public class App {
     private static Logger logger;
-    private static final Integer SEQUENCE_SIZE = 100000;
+    private static final Integer SEQUENCE_SIZE = 10000;
 
     public static void main(String[] args) {
         logger = Logger.getGlobal();
@@ -95,8 +95,8 @@ public class App {
     }
 
     private static void functionalForEachIterateConcat(ArrayList<Integer> list) {
-        StringBuilder output = new StringBuilder();
-        list.forEach(integer -> output.append(", " + valueOf(integer)));
+        String output = "";
+        list.forEach(integer -> output.concat(", " + valueOf(integer)));
 
         logger.finest(output.toString());
     }

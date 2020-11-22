@@ -11,14 +11,14 @@
 		"Other"
 	],
 	"activationEvents": [
-        "onCommand:make-java-great-again.helloWorld"
+        "onCommand:make-java-great-again.refactorFile"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "make-java-great-again.helloWorld",
-				"title": "Hello World"
+				"command": "make-java-great-again.refactorFile",
+				"title": "MJGA: Refactor File"
 			}
 		]
 	},
