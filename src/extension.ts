@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { TextEditor } from 'vscode';
+import { transformCode } from './transformCode';
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -23,11 +24,6 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(disposable);
 }
 
-
-function transformCode(code: string): string {
-	return `${code}
-// Transformed from Make Java Great Again`;
-}
 
 function readCode(): string {
 	const editor = getEditor();

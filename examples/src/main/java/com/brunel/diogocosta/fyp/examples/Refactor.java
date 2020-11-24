@@ -1,13 +1,18 @@
 package com.brunel.diogocosta.fyp.examples;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class Refactor {
   public static void main(String[] args) {
-    refactorMe();
-  }
+    List<String> names = Arrays.asList("Diogo", "Costa");
 
-  private static void refactorMe() {
-    for (int i = 0; i < 10; i++) {
-      System.out.println(i);
+    for (int i = 0; i < names.size(); i++) {
+      System.out.println(names.get(i));
     }
+
+    names.forEach(name -> {
+      System.out.println(name);
+    });
   }
 }
