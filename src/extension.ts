@@ -1,133 +1,170 @@
 import { CstNode } from "chevrotain";
-import { BaseJavaCstVisitorWithDefaults, OrdinaryCompilationUnitCstNode } from 'java-parser';
-import * as path from 'path';
-import * as prettierJava from 'prettier-plugin-java';
-import * as vscode from 'vscode';
-import { TextEditor } from 'vscode';
-import { transformCode } from './transformCode';
-import indexBy from "@unction/indexby";
-import groupBy from "@unction/groupby";
-import key from "@unction/keys";
-import keyChain from "@unction/keys";
-import makeIterable from "@lopatnov/make-iterable";
+import * as path from "path";
+import * as prettierJava from "prettier-plugin-java";
+import * as vscode from "vscode";
+import { TextEditor } from "vscode";
+import { transformCode } from "./transformCode";
+import { flatten, unflatten } from "flat";
+import * as mulang from "mulang";
 
-const _ = require('lodash');
-require('deepdash')(_);
+const _ = require("lodash");
+require("deepdash")(_);
 
 export function activate(context: vscode.ExtensionContext) {
-   // Use the console to output diagnostic information (console.log) and errors (console.error)
-   // This line of code will only be executed once when your extension is activated
-   console.log('Let\'s Make Java Great Again!');
+  // Use the console to output diagnostic information (console.log) and errors (console.error)
+  // This line of code will only be executed once when your extension is activated
+  console.log("Let's Make Java Great Again!");
 
-   context.subscriptions.push(
-      vscode.commands.registerCommand('make-java-great-again.refactorFile', () => {
-         refactorFile();
-      }),
-      vscode.commands.registerCommand('make-java-great-again.displaySyntaxTree', () => {
-         displaySyntaxTree();
-      }),
-   );
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "make-java-great-again.refactorFile",
+      () => {
+        refactorFile();
+      }
+    ),
+    vscode.commands.registerCommand(
+      "make-java-great-again.displaySyntaxTree",
+      () => {
+        displaySyntaxTree();
+      }
+    )
+  );
 }
 
 function refactorFile(): void {
-   const code = readCode();
-   if (typeof code !== 'string') {
-      throw Error('Was unable to read code!');
-   }
+  const code = readCode();
+  if (typeof code !== "string") {
+    throw Error("Was unable to read code!");
+  }
 
-   const cst = parse(code);
-   const transformedCode = transformCode(cst);
-   //writeCode(transformedCode);
+  const cst = parse(code);
+  const transformedCode = transformCode(cst);
+  //writeCode(transformedCode);
 }
 
 function displaySyntaxTree() {
-   const editor = getEditor();
-   const code = editor.document.getText();
-   if (typeof code !== 'string') {
-      throw Error('Was unable to read code!');
-   }
+  console.log("test");
+  const editor = getEditor();
+  const code = editor.document.getText();
+  if (typeof code !== "string") {
+    throw Error("Was unable to read code!");
+  }
 
-   // Get the last part of the filename (after the last slash), e.g. Refactor.java
-   const filename = editor.document.fileName.substring(editor.document.fileName.lastIndexOf('/') + 1);
-   const panel = vscode.window.createWebviewPanel(
-      'syntaxTreeGraph',
-      `${filename} - Syntax Tree`,
-      vscode.ViewColumn.One,
-      {
-         enableScripts: true,
+  // Get the last part of the filename (after the last slash), e.g. Refactor.java
+  const filename = editor.document.fileName.substring(
+    editor.document.fileName.lastIndexOf("/") + 1
+  );
+  const panel = vscode.window.createWebviewPanel(
+    "syntaxTreeGraph",
+    `${filename} - Simple Abstract Syntax Tree`,
+    vscode.ViewColumn.One,
+    {
+      enableScripts: true,
+    }
+  );
+
+  let ast = mulang.nativeCode("Java", code).ast;
+  ast = _.filterDeep(ast, (value, key, parent) => {
+    if (value !== null) {
+      return true;
+    }
+
+    if (Array.isArray(value) && value.length > 0) {
+      return true;
+    }
+  });
+
+  let flattenAst = flatten(ast) as object;
+  let flattedModifiedAst = {};
+  Object.keys(flattenAst).forEach((key: string) => {
+    let newKey = key;
+    let newValue = flattenAst[key];
+
+    newKey = newKey.replace(/tag/g, "name");
+
+    if (newKey.endsWith("contents")) {
+      newValue = [newValue];
+      newKey = newKey.concat(".0");
+    }
+
+    newKey = newKey.replace(/contents/g, "children");
+    if (flattenAst[key] === null) {
+      newValue = "";
+    }
+
+    let lastChar = newKey.substr(newKey.length - 1);
+    if (!isNaN(parseInt(lastChar))) {
+      newKey = newKey.concat(".name");
+    }
+
+    flattedModifiedAst[newKey] = newValue;
+  });
+
+  let jsonString = JSON.stringify(unflatten(flattedModifiedAst));
+  const newFile = vscode.Uri.parse(
+    "untitled:" +
+      path.join(
+        vscode.workspace.workspaceFolders!.toString(),
+        "simple-ast.json"
+      )
+  );
+
+  vscode.workspace.openTextDocument(newFile).then((document) => {
+    const edit = new vscode.WorkspaceEdit();
+    edit.insert(newFile, new vscode.Position(0, 0), jsonString);
+    return vscode.workspace.applyEdit(edit).then((success) => {
+      if (success) {
+        vscode.window.showTextDocument(document);
+      } else {
+        vscode.window.showInformationMessage("Error!");
       }
-   );
+    });
+  });
 
-   const cst = parse(code);
-   const BaseCstVisitorWithDefaults = new BaseJavaCstVisitorWithDefaults();
-
-   const ordinaryCompilationUnit = cst.children.ordinaryCompilationUnit[0] as OrdinaryCompilationUnitCstNode;
-   
-   const omitDeep = require("omit-deep-lodash");
-   let keysToRemove = ['location', 'endColumn', 'endLine', 'endOffset', 'startColumn', 'startLine', 'startOffset', 'tokenType', 'tokenTypeIdx'];
-   let tree = omitDeep(ordinaryCompilationUnit, keysToRemove);
-   let children = tree.children;
-   tree.children = [...children.importDeclaration, ...children.packageDeclaration, ...children.typeDeclaration]; 
-
-   let jsonString = JSON.stringify(tree);
-   const newFile = vscode.Uri.parse('untitled:' + path.join(vscode.workspace.workspaceFolders!.toString(), 'syntax-tree.json'));
-   vscode.workspace.openTextDocument(newFile).then(document => {
-      const edit = new vscode.WorkspaceEdit();
-      edit.insert(newFile, new vscode.Position(0, 0), jsonString);
-      return vscode.workspace.applyEdit(edit).then(success => {
-         if (success) {
-            vscode.window.showTextDocument(document);
-         } else {
-            vscode.window.showInformationMessage('Error!');
-         }
-      });
-   });
-
-   // And set its HTML content
-   panel.webview.html = getWebviewContent(jsonString);
-   let test3223 = '';
+  // And set its HTML content
+  panel.webview.html = getWebviewContent(jsonString);
 }
 
 function parse(code: string): CstNode {
-   return prettierJava.parsers.java.parse(code, null, 'ordinaryCompilationUnit');
+  return prettierJava.parsers.java.parse(code, null, "ordinaryCompilationUnit");
 }
 
 function readCode(): string {
-   const editor = getEditor();
-   return editor.document.getText();
+  const editor = getEditor();
+  return editor.document.getText();
 }
 
 function writeCode(code: string): void {
-   const editor = getEditor();
-   const edit = new vscode.WorkspaceEdit();
+  const editor = getEditor();
+  const edit = new vscode.WorkspaceEdit();
 
-   const wholeDocument = new vscode.Range(
-      new vscode.Position(0, 0),
-      new vscode.Position(editor.document.lineCount, 0)
-   );
+  const wholeDocument = new vscode.Range(
+    new vscode.Position(0, 0),
+    new vscode.Position(editor.document.lineCount, 0)
+  );
 
-   const updateCode = new vscode.TextEdit(wholeDocument, code);
-   edit.set(editor.document.uri, [updateCode]);
+  const updateCode = new vscode.TextEdit(wholeDocument, code);
+  edit.set(editor.document.uri, [updateCode]);
 
-   vscode.workspace.applyEdit(edit);
+  vscode.workspace.applyEdit(edit);
 }
 
 function getEditor(): TextEditor {
-   const editor = vscode.window.activeTextEditor;
-   if (!editor) {
-      throw Error('No active editor!');
-   }
+  const editor = vscode.window.activeTextEditor;
+  if (!editor) {
+    throw Error("No active editor!");
+  }
 
-   return editor;
+  return editor;
 }
 
 function getWebviewContent(treeData: string) {
-   return `<!DOCTYPE html>
+  return `<!DOCTYPE html>
   <html lang="en">
   <head>
-	  <meta charset="UTF-8">
-	  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Syntax Tree</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Abstract Syntax Tree</title>
     <style>
       .node {
         cursor: pointer;
@@ -155,13 +192,14 @@ function getWebviewContent(treeData: string) {
     </style>
   </head>
   <body>
-    <div id="tree">Syntax Tree</div>
+    <h1>Simple Abstract Syntax Tree</div>
+    <br />
+    <div id="tree"></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
     <script>
-      console.log(${treeData});
       var margin = { top: 40, right: 120, bottom: 20, left: 120 };
-      var width = 960 - margin.right - margin.left;
-      var height = 500 - margin.top - margin.bottom;
+      var width = window.innerWidth / 2;
+      var height = window.innerHeight;
 
       var i = 0, duration = 750;
       var tree = d3.layout.tree()
@@ -286,4 +324,4 @@ function getWebviewContent(treeData: string) {
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() { }
+export function deactivate() {}
