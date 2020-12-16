@@ -172,7 +172,7 @@
         "affectsGlobalScope": false
       },
       "./src/extension.ts": {
-        "version": "6abadc38b7fb8c81253f9744d6763a8e3397687c71cf2f63d9c1f8c6c11114eb",
+        "version": "999ba9794e0d2e6aa8da283fa334ea23ad75523b2a4733103313e1994bbe20ca",
         "signature": "2caa813611cb793b9df7b36e79c41c3fd041606ef7cb7250d6d0704cac44e446",
         "affectsGlobalScope": false
       },
@@ -635,7 +635,9 @@
     },
     "exportedModulesMap": {
       "./node_modules/@types/glob/index.d.ts": [
-        "./node_modules/@types/minimatch/index.d.ts"
+        "./node_modules/@types/minimatch/index.d.ts",
+        "./node_modules/@types/node/events.d.ts",
+        "./node_modules/@types/node/index.d.ts"
       ],
       "./node_modules/@types/node/base.d.ts": [
         "./node_modules/@types/node/assert.d.ts",
@@ -11260,5 +11262,5 @@
       "./src/typings.d.ts"
     ]
   },
-  "version": "4.1.2"
+  "version": "4.1.3"
 }

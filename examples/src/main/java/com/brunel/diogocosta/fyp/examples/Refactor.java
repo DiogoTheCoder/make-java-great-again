@@ -5,15 +5,7 @@ import java.util.List;
 
 public class Refactor {
   public static void main(String[] args) {
-    String name = "Diogo Costa";
-    // List<String> names = Arrays.asList("Diogo", "Costa");
-
-    // for (int i = 0; i < names.size(); i++) {
-    //   System.out.println(names.get(i));
-    // }
-
-    // names.forEach(name -> {
-    //   System.out.println(name);
-    // });
+    String forename = "Diogo";
+    String surname = "Costa";
   }
 }

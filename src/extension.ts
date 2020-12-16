@@ -63,16 +63,44 @@ function displaySyntaxTree() {
     }
   );
 
-  let ast = mulang.nativeCode("Java", code).ast;
+  let ast = {
+    tag: "",
+    contents: {},
+  };
+
+  try {
+    ast = mulang.nativeCode("Java", code).ast;
+  } catch (error) {
+    throw Error(error.message);
+  }
+
   ast = _.filterDeep(ast, (value, key, parent) => {
     if (value !== null) {
+      if (Array.isArray(value) && value.length === 0) {
+        return false;
+      }
+
       return true;
     }
 
-    if (Array.isArray(value) && value.length > 0) {
-      return true;
-    }
+    return false;
   });
+
+  // First 'contents' is the Class name
+  ast.contents = [
+    {
+      tag: ast.contents[0],
+      contents: [ast.contents[1]],
+    },
+  ];
+
+  // Fix up the EntryPoint as well
+  ast.contents[0].contents[0].contents = [
+    {
+      tag: ast.contents[0].contents[0].contents[0],
+      contents: [ast.contents[0].contents[0].contents[1]],
+    },
+  ];
 
   let flattenAst = flatten(ast) as object;
   let flattedModifiedAst = {};
