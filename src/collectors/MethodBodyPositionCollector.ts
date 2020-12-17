@@ -1,4 +1,8 @@
-import { BaseJavaCstVisitorWithDefaults, MethodBodyCstNode, MethodBodyCtx } from "java-parser";
+import {
+  BaseJavaCstVisitorWithDefaults,
+  MethodBodyCstNode,
+  MethodBodyCtx,
+} from 'java-parser';
 
 export class MethodBodyPositionCollector extends BaseJavaCstVisitorWithDefaults {
   customResult: MethodBodyCstNode[];
