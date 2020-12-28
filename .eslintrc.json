@@ -12,6 +12,7 @@
     "comma-dangle": [
       "error",
       {
+        "endOfLine": "auto",
         "arrays": "always-multiline",
         "objects": "always-multiline",
         "imports": "always-multiline",

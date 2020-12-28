@@ -20,7 +20,7 @@ export function parse(code: string): CstNode {
   return prettierJava.parsers.java.parse(code, null, 'ordinaryCompilationUnit');
 }
 
-function writeCode(code: string): void {
+export function writeCode(code: string): void {
   const editor = getEditor();
   const edit = new vscode.WorkspaceEdit();
 

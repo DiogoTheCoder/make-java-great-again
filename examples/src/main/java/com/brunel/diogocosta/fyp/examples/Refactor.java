@@ -1,11 +1,12 @@
 package com.brunel.diogocosta.fyp.examples;
 
-import java.util.Arrays;
-import java.util.List;
-
 public class Refactor {
+
   public static void main(String[] args) {
-    String forename = "Diogo";
-    String surname = "Costa";
+    String[] name = { "Diogo", "Costa" };
+
+    for (int x = 0; x < name.length; x++) {
+      System.out.println(name[x]);
+    }
   }
 }

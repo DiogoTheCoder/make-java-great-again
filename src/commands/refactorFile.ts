@@ -1,5 +1,7 @@
-import { parse, readCode } from '../utils';
+import { parse, readCode, writeCode } from '../utils';
 import { transformCode } from '../collectors/transformCode';
+import { createPrettierDoc } from 'prettier-plugin-java/src/cst-printer.js';
+import { printer } from 'prettier/doc';
 
 export function refactorFile(): void {
   const code = readCode();
@@ -9,5 +11,15 @@ export function refactorFile(): void {
 
   const cst = parse(code);
   const transformedCode = transformCode(cst);
-  //writeCode(transformedCode);
+
+  const options = {
+    printWidth: 80,
+    tabWidth: 2,
+    useTabs: false,
+    trailingComma: "none",
+  };
+
+  const doc = createPrettierDoc(cst, options);
+  const codeString = printer.printDocToString(doc, options);
+  writeCode(codeString.formatted);
 }
