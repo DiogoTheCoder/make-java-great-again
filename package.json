@@ -11,8 +11,7 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:make-java-great-again.refactorFile",
-    "onCommand:make-java-great-again.displaySyntaxTree"
+    "onLanguage:java"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -24,6 +23,27 @@
       {
         "command": "make-java-great-again.displaySyntaxTree",
         "title": "MJGA: Display Simple Abstract Syntax Tree"
+      }
+    ],
+    "languages": [
+      {
+        "id": "java",
+        "aliases": [
+          "Java",
+          "java"
+        ],
+        "extensions": [
+          ".java",
+          ".class"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "java",
+        "scopeName": "source.java",
+        "path": "./syntaxes/hello.tmLanguage.json"
       }
     ]
   },
@@ -58,6 +78,7 @@
     "java-ast": "^0.3.0",
     "mulang": "^5.3.0",
     "prettier": "^2.2.1",
-    "prettier-plugin-java": "^1.0.1"
+    "prettier-plugin-java": "^1.0.1",
+    "vscode-languageclient": "6.1.3"
   }
 }

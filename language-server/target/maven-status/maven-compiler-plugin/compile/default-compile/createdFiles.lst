@@ -1,0 +1,3 @@
+org\hello\ls\langserver\HelloTextDocumentService.class
+org\hello\ls\langserver\HelloLanguageServer.class
+org\hello\ls\langserver\HelloWorkspaceService.class
