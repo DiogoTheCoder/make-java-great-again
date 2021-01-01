@@ -1,4 +1,4 @@
-package org.hello.ls.langserver;
+package org.brunel.fyp.langserver;
 
 import org.eclipse.lsp4j.CompletionOptions;
 import org.eclipse.lsp4j.InitializeParams;
@@ -13,22 +13,22 @@ import org.eclipse.lsp4j.services.WorkspaceService;
 
 import java.util.concurrent.CompletableFuture;
 
-public class HelloLanguageServer implements LanguageServer, LanguageClientAware {
+public class MJGALanguageServer implements LanguageServer, LanguageClientAware {
     private TextDocumentService textDocumentService;
     private WorkspaceService workspaceService;
     private LanguageClient client;
     private int errorCode = 1;
 
-    public HelloLanguageServer() {
-        this.textDocumentService = new HelloTextDocumentService();
-        this.workspaceService = new HelloWorkspaceService();
+    public MJGALanguageServer() {
+        this.textDocumentService = new MJGATextDocumentService();
+        this.workspaceService = new MJGAWorkspaceService();
     }
 
     @Override
     public CompletableFuture<InitializeResult> initialize(InitializeParams initializeParams) {
         // Initialize the InitializeResult for this LS.
         final InitializeResult initializeResult = new InitializeResult(new ServerCapabilities());
-
+        
         // Set the capabilities of the LS to inform the client.
         initializeResult.getCapabilities().setTextDocumentSync(TextDocumentSyncKind.Full);
         CompletionOptions completionOptions = new CompletionOptions();

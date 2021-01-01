@@ -5,6 +5,8 @@ import { displaySyntaxTree } from './commands/displaySyntaxTree';
 import { refactorFile } from './commands/refactorFile';
 import { LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-languageclient';
 
+let client: LanguageClient;
+
 // Name of the launcher class which contains the main.
 const main: string = 'StdioLauncher';
 
@@ -31,15 +33,19 @@ export function activate(context: vscode.ExtensionContext) {
     };
     
     let clientOptions: LanguageClientOptions = {
-			documentSelector: [{ scheme: 'file', language: 'java' }]
+      documentSelector: [{ scheme: 'file', language: 'java' }],
+      synchronize: {
+        configurationSection: 'java',
+      },
     };
 
-    let disposable = new LanguageClient('mjga', 'Make Java Great Again', serverOptions, clientOptions).start();
+    client = new LanguageClient('MJGA', 'Make Java Great Again', serverOptions, clientOptions);
+    let disposable = client.start();
 
     context.subscriptions.push(
       disposable,
       vscode.commands.registerCommand(Commands.REFACTOR_FILE, () => {
-        refactorFile();
+        refactorFile(client);
       }),
       vscode.commands.registerCommand(Commands.DISPLAY_AST, () => {
         displaySyntaxTree();
@@ -50,4 +56,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 export function deactivate() {
   console.log('Thank you for using Make Java Great Again! :)')
+  if (client) {
+    client.stop();
+  }
 }

@@ -1,3 +1,4 @@
-P:\FYP\brunel-fyp\language-server\src\main\java\org\hello\ls\langserver\HelloTextDocumentService.java
-P:\FYP\brunel-fyp\language-server\src\main\java\org\hello\ls\langserver\HelloLanguageServer.java
-P:\FYP\brunel-fyp\language-server\src\main\java\org\hello\ls\langserver\HelloWorkspaceService.java
+P:\FYP\brunel-fyp\language-server\src\main\java\org\brunel\fyp\langserver\MJGALanguageServer.java
+P:\FYP\brunel-fyp\language-server\src\main\java\org\brunel\fyp\langserver\MJGAWorkspaceService.java
+P:\FYP\brunel-fyp\language-server\src\main\java\org\brunel\fyp\langserver\RequestService.java
+P:\FYP\brunel-fyp\language-server\src\main\java\org\brunel\fyp\langserver\MJGATextDocumentService.java
