@@ -12,14 +12,17 @@ import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.logging.Logger;
 
 public class MJGALanguageServer implements LanguageServer, LanguageClientAware {
+    public static LanguageClient CLIENT;
+
     private TextDocumentService textDocumentService;
     private WorkspaceService workspaceService;
-    private LanguageClient client;
     private int errorCode = 1;
 
     public MJGALanguageServer() {
+        Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).info("Instantiating " + this.getClass().getSimpleName() + "...");
         this.textDocumentService = new MJGATextDocumentService();
         this.workspaceService = new MJGAWorkspaceService();
     }
@@ -64,6 +67,6 @@ public class MJGALanguageServer implements LanguageServer, LanguageClientAware {
     @Override
     public void connect(LanguageClient languageClient) {
         // Get the client which started this LS.
-        this.client = languageClient;
+        CLIENT = languageClient;
     }
 }

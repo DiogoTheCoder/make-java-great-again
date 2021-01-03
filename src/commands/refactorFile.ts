@@ -12,7 +12,9 @@ export function refactorFile(client: LanguageClient): void {
 
   try {
     client.onReady().then(() => {
-      client.sendRequest("mjga/refactorCode")
+      client.sendRequest("mjga/refactorCode", {
+        code: code
+      })
         .then(data => {
           console.log(data);
         });
