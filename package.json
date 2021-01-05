@@ -18,11 +18,13 @@
     "commands": [
       {
         "command": "make-java-great-again.refactorFile",
-        "title": "MJGA: Refactor File"
+        "category": "MJGA",
+        "title": "Refactor File"
       },
       {
         "command": "make-java-great-again.displaySyntaxTree",
-        "title": "MJGA: Display Simple Abstract Syntax Tree"
+        "category": "MJGA",
+        "title": "Display Simple Abstract Syntax Tree"
       }
     ],
     "languages": [

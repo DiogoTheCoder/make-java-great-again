@@ -3,6 +3,7 @@ import { transformCode } from '../collectors/transformCode';
 import { createPrettierDoc } from 'prettier-plugin-java/src/cst-printer.js';
 import { printer } from 'prettier/doc';
 import { LanguageClient } from 'vscode-languageclient';
+import * as vscode from 'vscode';
 
 export function refactorFile(client: LanguageClient): void {
   const code = readCode();
@@ -10,18 +11,18 @@ export function refactorFile(client: LanguageClient): void {
     throw Error('Was unable to read code!');
   }
 
-  try {
-    client.onReady().then(() => {
-      client.sendRequest("mjga/refactorCode", {
-        code: code
-      })
-        .then(data => {
-          console.log(data);
-        });
-    }); 
-  } catch (error) {
-    console.log(error);
-  }
+  vscode.commands.executeCommand('mjga.langserver.refactorFile', code);
+
+  // try {
+  //   client.onReady().then(() => {
+  //     client.sendRequest("mjga/refactorCode", code)
+  //       .then(data => {
+  //         console.log(data);
+  //       });
+  //   }); 
+  // } catch (error) {
+  //   console.log(error);
+  // }
 
   // const cst = parse(code);
   // const transformedCode = transformCode(cst);
