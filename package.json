@@ -41,13 +41,13 @@
         "configuration": "./language-configuration.json"
       }
     ],
-    "grammars": [
-      {
-        "language": "java",
-        "scopeName": "source.java",
-        "path": "./syntaxes/hello.tmLanguage.json"
-      }
-    ],
+		"grammars": [
+			{
+				"language": "java",
+				"scopeName": "source.java",
+				"path": "./syntaxes/java.tmLanguage.json"
+			}
+		],
     "configuration": {
 			"type": "object",
 			"title": "Example configuration",

@@ -18,7 +18,7 @@ public class MJGAWorkspaceService implements WorkspaceService {
         return CompletableFuture.supplyAsync(() -> {
             MJGALanguageServer.CLIENT.showMessage(new MessageParams(MessageType.Info, params.getCommand()));
             MJGALanguageServer.CLIENT.showMessage(new MessageParams(MessageType.Info, params.getArguments().toString()));
-            return params;
+            return params.getArguments().get(0);
         });
     }
 

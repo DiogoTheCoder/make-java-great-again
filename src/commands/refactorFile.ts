@@ -5,13 +5,14 @@ import { printer } from 'prettier/doc';
 import { LanguageClient } from 'vscode-languageclient';
 import * as vscode from 'vscode';
 
-export function refactorFile(client: LanguageClient): void {
+export async function refactorFile(client: LanguageClient): Promise<void> {
   const code = readCode();
   if (typeof code !== 'string') {
     throw Error('Was unable to read code!');
   }
 
-  vscode.commands.executeCommand('mjga.langserver.refactorFile', code);
+  let command = await vscode.commands.executeCommand('mjga.langserver.refactorFile', code);
+  console.log(command);
 
   // try {
   //   client.onReady().then(() => {
