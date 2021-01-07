@@ -2,14 +2,11 @@ package com.brunel.diogocosta.fyp.examples;
 
 import static java.lang.String.valueOf;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
@@ -17,8 +14,8 @@ import java.util.stream.Collectors;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.LambdaExpr;
@@ -42,17 +39,15 @@ public class App {
         CompilationUnit compilationUnit;
         try {
             compilationUnit = StaticJavaParser.parse(new FileInputStream(filePath.toAbsolutePath().toString()));
-            compilationUnit.findAll(ExpressionStmt.class)
-            .stream()
-            .forEach(lambdaExpr -> {
-                //System.out.println(lambdaExpr);
-                //LambdaExpr lambdaExpr = new LambdaExpr(forEachStmt.getIterable(), forEachStmt.getBody());
-                // ExpressionStmt expressionStmt = new ExpressionStmt();
-            });
-            MethodDeclaration mDeclaration = (MethodDeclaration) compilationUnit.getChildNodes().get(2).getChildNodes().get(2);
-            BlockStmt blockStmt = mDeclaration.getBody().get();
-            ExpressionStmt expressionStmt = (ExpressionStmt) blockStmt.getChildNodes().get(1);
-            MethodCallExpr methodCallExprLambda = (MethodCallExpr) expressionStmt.getChildNodes().get(0);
+            
+            /**
+             * Variables used for debugging/testing
+             */
+            // MethodDeclaration mDeclaration = (MethodDeclaration) compilationUnit.getChildNodes().get(2).getChildNodes().get(2);
+            // BlockStmt blockStmt = mDeclaration.getBody().get();
+            // ExpressionStmt expressionStmt = (ExpressionStmt) blockStmt.getChildNodes().get(1);
+            // MethodCallExpr methodCallExprLambda = (MethodCallExpr) expressionStmt.getChildNodes().get(0);
+            
             compilationUnit.findAll(ForEachStmt.class)
                 .stream()
                 .forEach(forEachStmt -> {
@@ -69,7 +64,7 @@ public class App {
                     methodCallExprArrays.setScope(nameExprArrays);
                     methodCallExprArrays.setName(simpleNameStream);
                     // Name of the array to loop, argument for Arrays.stream()
-                    methodCallExprArrays.setArguments(new NodeList<Expression>(new NameExpr("name")));
+                    methodCallExprArrays.setArguments(new NodeList<Expression>(forEachStmt.getIterable().asNameExpr()));
                     
                     // Arrays.stream(name), forEach, "string -> {
                     MethodCallExpr methodCallExpr = new MethodCallExpr();
@@ -78,7 +73,7 @@ public class App {
                     methodCallExpr.setName(new SimpleName("forEach"));
 
                     // string
-                    Parameter parameterString = new Parameter(new UnknownType(), new SimpleName("string"));
+                    Parameter parameterString = new Parameter(new UnknownType(),forEachStmt.getVariableDeclarator().getName());
                     // "string -> {
                     LambdaExpr lambdaExpr = new LambdaExpr(parameterString, (BlockStmt) forEachStmt.getBody());
 
@@ -91,6 +86,8 @@ public class App {
 
                     forEachStmt.replace(eStmt);
                 });
+
+                compilationUnit.addImport(new ImportDeclaration("java.util.Arrays", false, false));
             
             System.out.println(compilationUnit);
         } catch (FileNotFoundException e) {
