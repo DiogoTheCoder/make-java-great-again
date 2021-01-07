@@ -1,4 +1,3 @@
-org\brunel\fyp\langserver\MJGALanguageServer.class
 org\brunel\fyp\langserver\MJGAWorkspaceService.class
 org\brunel\fyp\langserver\MJGATextDocumentService.class
-org\brunel\fyp\langserver\RequestService.class
+org\brunel\fyp\langserver\MJGALanguageServer.class

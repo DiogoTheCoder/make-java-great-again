@@ -8,18 +8,10 @@ import java.io.OutputStream;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
-import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
-/**
- * Launcher for hello language server.
- */
 public class StdioLauncher {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
-        // As we are using system std io channels
-        // we need to reset and turn off the logging globally
-        // So our client->server communication doesn't get interrupted.
-        LogManager.getLogManager().reset();
         Logger globalLogger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
         globalLogger.setLevel(Level.ALL);
 

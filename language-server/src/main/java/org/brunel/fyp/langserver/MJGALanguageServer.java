@@ -1,6 +1,6 @@
 package org.brunel.fyp.langserver;
 
-import org.eclipse.lsp4j.CompletionOptions;
+import org.eclipse.lsp4j.ExecuteCommandOptions;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.ServerCapabilities;
@@ -11,15 +11,20 @@ import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.logging.Logger;
 
 public class MJGALanguageServer implements LanguageServer, LanguageClientAware {
+    public static LanguageClient CLIENT;
+
     private TextDocumentService textDocumentService;
     private WorkspaceService workspaceService;
-    private LanguageClient client;
     private int errorCode = 1;
 
     public MJGALanguageServer() {
+        Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).info("Instantiating " + this.getClass().getSimpleName() + "...");
         this.textDocumentService = new MJGATextDocumentService();
         this.workspaceService = new MJGAWorkspaceService();
     }
@@ -31,8 +36,10 @@ public class MJGALanguageServer implements LanguageServer, LanguageClientAware {
         
         // Set the capabilities of the LS to inform the client.
         initializeResult.getCapabilities().setTextDocumentSync(TextDocumentSyncKind.Full);
-        CompletionOptions completionOptions = new CompletionOptions();
-        initializeResult.getCapabilities().setCompletionProvider(completionOptions);
+
+        List<String> commands = Arrays.asList("mjga.langserver.refactorFile");
+        ExecuteCommandOptions executeCommandOptions = new ExecuteCommandOptions(commands);
+        initializeResult.getCapabilities().setExecuteCommandProvider(executeCommandOptions);
         return CompletableFuture.supplyAsync(()->initializeResult);
     }
 
@@ -64,6 +71,6 @@ public class MJGALanguageServer implements LanguageServer, LanguageClientAware {
     @Override
     public void connect(LanguageClient languageClient) {
         // Get the client which started this LS.
-        this.client = languageClient;
+        CLIENT = languageClient;
     }
 }

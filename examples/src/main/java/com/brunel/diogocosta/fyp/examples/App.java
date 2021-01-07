@@ -2,41 +2,126 @@ package com.brunel.diogocosta.fyp.examples;
 
 import static java.lang.String.valueOf;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import com.github.javaparser.StaticJavaParser;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.ImportDeclaration;
+import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.LambdaExpr;
+import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.NameExpr;
+import com.github.javaparser.ast.expr.SimpleName;
+import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.stmt.ExpressionStmt;
+import com.github.javaparser.ast.stmt.ForEachStmt;
+import com.github.javaparser.ast.type.UnknownType;
+
 public class App {
     private static Logger logger;
     private static final Integer SEQUENCE_SIZE = 10000;
 
     public static void main(String[] args) {
-        logger = Logger.getGlobal();
+        /**
+         * Testing refactoring code
+         */
+        Path filePath = Paths.get("examples\\src\\main\\java\\com\\brunel\\diogocosta\\fyp\\examples\\Refactor.java");
+        CompilationUnit compilationUnit;
+        try {
+            compilationUnit = StaticJavaParser.parse(new FileInputStream(filePath.toAbsolutePath().toString()));
+            
+            /**
+             * Variables used for debugging/testing
+             */
+            // MethodDeclaration mDeclaration = (MethodDeclaration) compilationUnit.getChildNodes().get(2).getChildNodes().get(2);
+            // BlockStmt blockStmt = mDeclaration.getBody().get();
+            // ExpressionStmt expressionStmt = (ExpressionStmt) blockStmt.getChildNodes().get(1);
+            // MethodCallExpr methodCallExprLambda = (MethodCallExpr) expressionStmt.getChildNodes().get(0);
+            
+            compilationUnit.findAll(ForEachStmt.class)
+                .stream()
+                .forEach(forEachStmt -> {
+                    ExpressionStmt eStmt = new ExpressionStmt();
 
-        logger.fine("Hello World!");
+                    // Arrays.stream(name)
+                    MethodCallExpr methodCallExprArrays = new MethodCallExpr();
+                    // Arrays
+                    NameExpr nameExprArrays = new NameExpr(new SimpleName("Arrays"));
+                    // stream
+                    SimpleName simpleNameStream = new SimpleName("stream");
 
-        timeAndExecuteFunction(() -> generateSequence(), "generateSequence");
-        ArrayList<Integer> sequence = generateSequence();
+                    nameExprArrays.setParentNode(methodCallExprArrays);
+                    methodCallExprArrays.setScope(nameExprArrays);
+                    methodCallExprArrays.setName(simpleNameStream);
+                    // Name of the array to loop, argument for Arrays.stream()
+                    methodCallExprArrays.setArguments(new NodeList<Expression>(forEachStmt.getIterable().asNameExpr()));
+                    
+                    // Arrays.stream(name), forEach, "string -> {
+                    MethodCallExpr methodCallExpr = new MethodCallExpr();
 
-        logger.info("--- ITERATING ARRAYLIST ---");
-        timeAndExecuteFunction(() -> forLoopIterate(sequence), "forLoopIterate");
-        timeAndExecuteFunction(() -> forEachIterate(sequence), "forEachIterate");
-        timeAndExecuteFunction(() -> whileIterate(sequence), "whileIterate");
-        timeAndExecuteFunction(() -> whileIterator(sequence), "whileIterator");
-        timeAndExecuteFunction(() -> functionalForEachIterate(sequence), "functionalForEachIterate");
-        timeAndExecuteFunction(() -> functionalStreamForEachIterate(sequence), "functionalStreamForEachIterate");
+                    // forEach
+                    methodCallExpr.setName(new SimpleName("forEach"));
 
-        logger.info("--- CONCATENATING ARRAYLIST ELEMENTS ---");
-        timeAndExecuteFunction(() -> forEachIterateConcat(sequence), "forEachIterateConcat");
-        timeAndExecuteFunction(() -> functionalForEachIterateConcat(sequence), "functionalForEachIterateConcat");
-        timeAndExecuteFunction(() -> functionalStreamCollectConcat(sequence), "functionalStreamCollectConcat");
+                    // string
+                    Parameter parameterString = new Parameter(new UnknownType(),forEachStmt.getVariableDeclarator().getName());
+                    // "string -> {
+                    LambdaExpr lambdaExpr = new LambdaExpr(parameterString, (BlockStmt) forEachStmt.getBody());
 
-        logger.info("--- SUMMING ARRAYLIST ELEMENTS ---");
-        timeAndExecuteFunction(() -> forEachIterateSum(sequence), "forEachIterateSum");
-        timeAndExecuteFunction(() -> functionalForEachIterateSum(sequence), "functionalForEachIterateSum");
-        timeAndExecuteFunction(() -> functionalStreamCollectSum(sequence), "functionalStreamCollectSum");
+                    // Arrays.stream(name), "string ->
+                    methodCallExpr.setArguments(new NodeList<Expression>(lambdaExpr));
+
+                    methodCallExpr.setScope(methodCallExprArrays);
+
+                    eStmt.setExpression(methodCallExpr);
+
+                    forEachStmt.replace(eStmt);
+                });
+
+                compilationUnit.addImport(new ImportDeclaration("java.util.Arrays", false, false));
+            
+            System.out.println(compilationUnit);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        
+        /**
+         * Performance tests
+         */
+        // logger = Logger.getGlobal();
+
+        // logger.fine("Hello World!");
+
+        // timeAndExecuteFunction(() -> generateSequence(), "generateSequence");
+        // ArrayList<Integer> sequence = generateSequence();
+
+        // logger.info("--- ITERATING ARRAYLIST ---");
+        // timeAndExecuteFunction(() -> forLoopIterate(sequence), "forLoopIterate");
+        // timeAndExecuteFunction(() -> forEachIterate(sequence), "forEachIterate");
+        // timeAndExecuteFunction(() -> whileIterate(sequence), "whileIterate");
+        // timeAndExecuteFunction(() -> whileIterator(sequence), "whileIterator");
+        // timeAndExecuteFunction(() -> functionalForEachIterate(sequence), "functionalForEachIterate");
+        // timeAndExecuteFunction(() -> functionalStreamForEachIterate(sequence), "functionalStreamForEachIterate");
+
+        // logger.info("--- CONCATENATING ARRAYLIST ELEMENTS ---");
+        // timeAndExecuteFunction(() -> forEachIterateConcat(sequence), "forEachIterateConcat");
+        // timeAndExecuteFunction(() -> functionalForEachIterateConcat(sequence), "functionalForEachIterateConcat");
+        // timeAndExecuteFunction(() -> functionalStreamCollectConcat(sequence), "functionalStreamCollectConcat");
+
+        // logger.info("--- SUMMING ARRAYLIST ELEMENTS ---");
+        // timeAndExecuteFunction(() -> forEachIterateSum(sequence), "forEachIterateSum");
+        // timeAndExecuteFunction(() -> functionalForEachIterateSum(sequence), "functionalForEachIterateSum");
+        // timeAndExecuteFunction(() -> functionalStreamCollectSum(sequence), "functionalStreamCollectSum");
     }
 
     private static void forLoopIterate(ArrayList<Integer> list) {
