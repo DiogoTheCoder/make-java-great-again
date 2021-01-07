@@ -3,8 +3,6 @@ package org.brunel.fyp.langserver;
 import org.eclipse.lsp4j.DidChangeConfigurationParams;
 import org.eclipse.lsp4j.DidChangeWatchedFilesParams;
 import org.eclipse.lsp4j.ExecuteCommandParams;
-import org.eclipse.lsp4j.MessageParams;
-import org.eclipse.lsp4j.MessageType;
 import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.WorkspaceSymbolParams;
 import org.eclipse.lsp4j.services.WorkspaceService;
@@ -18,8 +16,18 @@ import java.util.logging.Logger;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.ImportDeclaration;
+import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ForEachStmt;
-import com.github.javaparser.ast.stmt.ForStmt;
+import com.github.javaparser.ast.type.UnknownType;
+import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.LambdaExpr;
+import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.NameExpr;
+import com.github.javaparser.ast.expr.SimpleName;
 
 public class MJGAWorkspaceService implements WorkspaceService {
     @Override
@@ -35,8 +43,43 @@ public class MJGAWorkspaceService implements WorkspaceService {
                     compilationUnit.findAll(ForEachStmt.class)
                         .stream()
                         .forEach(forEachStmt -> {
-                            forEachStmt.asForStmt();
+                            ExpressionStmt eStmt = new ExpressionStmt();
+
+                            // Arrays.stream(name)
+                            MethodCallExpr methodCallExprArrays = new MethodCallExpr();
+                            // Arrays
+                            NameExpr nameExprArrays = new NameExpr(new SimpleName("Arrays"));
+                            // stream
+                            SimpleName simpleNameStream = new SimpleName("stream");
+        
+                            nameExprArrays.setParentNode(methodCallExprArrays);
+                            methodCallExprArrays.setScope(nameExprArrays);
+                            methodCallExprArrays.setName(simpleNameStream);
+                            // Name of the array to loop, argument for Arrays.stream()
+                            methodCallExprArrays.setArguments(new NodeList<Expression>(forEachStmt.getIterable().asNameExpr()));
+                            
+                            // Arrays.stream(name), forEach, "string -> {
+                            MethodCallExpr methodCallExpr = new MethodCallExpr();
+        
+                            // forEach
+                            methodCallExpr.setName(new SimpleName("forEach"));
+        
+                            // string
+                            Parameter parameterString = new Parameter(new UnknownType(),forEachStmt.getVariableDeclarator().getName());
+                            // "string -> {
+                            LambdaExpr lambdaExpr = new LambdaExpr(parameterString, (BlockStmt) forEachStmt.getBody());
+        
+                            // Arrays.stream(name), "string ->
+                            methodCallExpr.setArguments(new NodeList<Expression>(lambdaExpr));
+        
+                            methodCallExpr.setScope(methodCallExprArrays);
+        
+                            eStmt.setExpression(methodCallExpr);
+        
+                            forEachStmt.replace(eStmt);
                         });
+
+                        compilationUnit.addImport(new ImportDeclaration("java.util.Arrays", false, false));
 
                     return compilationUnit.toString();
                 } catch (FileNotFoundException e) {
