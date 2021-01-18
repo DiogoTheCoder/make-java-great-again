@@ -103,6 +103,8 @@
     "mulang": "^5.3.0",
     "os": "^0.1.1",
     "path": "^0.12.7",
+    "prettier": "^2.2.1",
+    "prettier-plugin-java": "^1.0.1",
     "vscode-languageclient": "6.1.3"
   }
 }

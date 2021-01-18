@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import * as prettier from 'prettier';
 
 export function readCode(): string {
   const editor = getEditor();
@@ -23,7 +24,12 @@ export function writeCode(code: string): void {
     new vscode.Position(editor.document.lineCount, 0),
   );
 
-  const updateCode = new vscode.TextEdit(wholeDocument, code);
+  const formattedCode = prettier.format(code, {
+    parser: "java",
+    tabWidth: editor.options.tabSize,
+  });
+
+  const updateCode = new vscode.TextEdit(wholeDocument, formattedCode);
   edit.set(editor.document.uri, [updateCode]);
 
   vscode.workspace.applyEdit(edit);
