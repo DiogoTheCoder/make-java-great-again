@@ -1,6 +1,4 @@
-import * as prettierJava from 'prettier-plugin-java';
 import * as vscode from 'vscode';
-import { CstNode } from 'chevrotain';
 
 export function readCode(): string {
   const editor = getEditor();
@@ -14,10 +12,6 @@ export function getEditor(): vscode.TextEditor {
   }
 
   return editor;
-}
-
-export function parse(code: string): CstNode {
-  return prettierJava.parsers.java.parse(code, null, 'ordinaryCompilationUnit');
 }
 
 export function writeCode(code: string): void {

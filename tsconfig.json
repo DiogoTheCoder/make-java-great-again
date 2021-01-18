@@ -1,10 +1,6 @@
 {
 	"compileOnSave": true,
 	"compilerOptions": {
-		"composite": true,
-		"esModuleInterop": true,
-		"suppressImplicitAnyIndexErrors": true,
-		"noImplicitAny": false,
 		"module": "commonjs",
 		"target": "es6",
 		"outDir": "out",
@@ -13,11 +9,21 @@
 		],
 		"sourceMap": true,
 		"rootDir": "src",
-		"strict": true 
+		"strict": true,
+		"composite": true,
+		"esModuleInterop": true,
+		"suppressImplicitAnyIndexErrors": true,
+		"noImplicitAny": false,
+		"skipLibCheck": true,
 	},
+	"include": [
+		"src"
+	],
 	"exclude": [
-		"**/node_modules/**",
-		"**/vscode-test/**",
-		"**/out/**"
-	]
+		"node_modules",
+		"./node_modules",
+		"./node_modules/*",
+		"./node_modules/@types/node/index.d.ts",
+		"**/out/**",
+	],
 }
