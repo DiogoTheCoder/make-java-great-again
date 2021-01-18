@@ -75,6 +75,7 @@
   "scripts": {
     "vscode:prepublish": "yarn run compile",
     "compile": "tsc -p ./",
+    "build": "mvn clean install",
     "lint": "eslint . --fix",
     "watch": "tsc -watch -p ./",
     "pretest": "yarn run compile && yarn run lint",
