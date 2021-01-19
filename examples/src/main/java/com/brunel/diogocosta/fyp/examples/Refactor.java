@@ -1,8 +1,10 @@
 package com.brunel.diogocosta.fyp.examples;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
 
 public class Refactor {
 
@@ -18,6 +20,10 @@ public class Refactor {
     for (int i = 0; i < test2.size(); i++) {
       System.out.println(test2.get(i));
     }
+
+    IntStream.range(0, test2.size()).forEach(i -> {
+      System.out.println(test2.get(i));
+  });
 
     for (String testString : test2) {
       System.out.println(testString);

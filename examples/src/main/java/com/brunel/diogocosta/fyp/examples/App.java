@@ -22,11 +22,16 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.comments.Comment;
+import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.IntegerLiteralExpr;
 import com.github.javaparser.ast.expr.LambdaExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.SimpleName;
+import com.github.javaparser.ast.expr.UnaryExpr;
+import com.github.javaparser.ast.expr.VariableDeclarationExpr;
+import com.github.javaparser.ast.expr.UnaryExpr.Operator;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ForEachStmt;
@@ -105,7 +110,7 @@ public class App {
                     methodCallExpr.setName(new SimpleName("forEach"));
 
                     // string
-                    Parameter parameterString = new Parameter(new UnknownType(),forEachStmt.getVariableDeclarator().getName());
+                    Parameter parameterString = new Parameter(new UnknownType(), forEachStmt.getVariableDeclarator().getName());
                     // "string -> {
                     LambdaExpr lambdaExpr = new LambdaExpr(parameterString, (BlockStmt) forEachStmt.getBody());
 
@@ -122,7 +127,57 @@ public class App {
                 compilationUnit.findAll(ForStmt.class)
                 .stream()
                 .forEach(forStmt -> {
-                    System.out.println(forStmt);
+                    VariableDeclarationExpr initialisationVariableDeclarationExpr = forStmt.getInitialization().getFirst().get().asVariableDeclarationExpr();
+                    VariableDeclarator initialisationVariableDeclarator = initialisationVariableDeclarationExpr.getVariables().getFirst().get();
+                    IntegerLiteralExpr integerLiteralExpr = initialisationVariableDeclarator.getInitializer().get().asIntegerLiteralExpr();
+
+                    BinaryExpr comparisonBinaryExpr = forStmt.getCompare().get().asBinaryExpr();
+                    Expression comparisonRightExpression = comparisonBinaryExpr.getRight();
+
+                    UnaryExpr updateUnaryExpr = forStmt.getUpdate().getFirst().get().asUnaryExpr();
+                    Operator updateUnaryExprOperator = updateUnaryExpr.getOperator();
+
+                    ExpressionStmt eStmt = new ExpressionStmt();
+                    Optional<Comment> comment = forStmt.getComment();
+                    if (comment.isPresent()) {
+                        eStmt.setComment(comment.get());
+                    }
+
+                    // IntStream.range(0, length)
+                    MethodCallExpr methodCallExprIntStream = new MethodCallExpr();
+                    // range
+                    SimpleName simpleNameRange = new SimpleName("range");
+
+                    compilationUnit.addImport(new ImportDeclaration("java.util.stream.IntStream", false, false));
+                    NameExpr nameExprIntStream = new NameExpr(new SimpleName("IntStream"));
+
+                    // Name of the array to loop, argument for IntStream.range(startIndex, endIndex)
+                    methodCallExprIntStream.setArguments(new NodeList<Expression>(integerLiteralExpr, comparisonRightExpression));
+
+                    nameExprIntStream.setParentNode(methodCallExprIntStream);
+                    methodCallExprIntStream.setScope(nameExprIntStream);
+                    methodCallExprIntStream.setName(simpleNameRange);
+
+                    // Arrays.stream(name), forEach, "string -> {
+                    MethodCallExpr methodCallExpr = new MethodCallExpr();
+
+                    // forEach
+                    methodCallExpr.setName(new SimpleName("forEach"));
+
+                    // string
+                    Parameter parameterString = new Parameter(new UnknownType(), initialisationVariableDeclarator.getName());
+                    // "string -> {
+                    LambdaExpr lambdaExpr = new LambdaExpr(parameterString, (BlockStmt) forStmt.getBody());
+
+                    // Arrays.streams(name), "string ->
+                    methodCallExpr.setArguments(new NodeList<Expression>(lambdaExpr));
+
+                    methodCallExpr.setScope(methodCallExprIntStream);
+
+                    eStmt.setExpression(methodCallExpr);
+
+                    forStmt.replace(eStmt);
+                    //System.out.println(compilationUnit);
                 });
 
             System.out.println(compilationUnit);
