@@ -9,16 +9,19 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.LambdaExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
@@ -27,6 +30,7 @@ import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ForEachStmt;
+import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.type.UnknownType;
 
@@ -41,6 +45,9 @@ public class App {
         Path filePath = Paths.get("src\\main\\java\\com\\brunel\\diogocosta\\fyp\\examples\\Refactor.java");
         CompilationUnit compilationUnit;
         try {
+            ParserConfiguration parserConfig = new ParserConfiguration();
+            parserConfig.setAttributeComments(true);
+            StaticJavaParser.setConfiguration(parserConfig);
             compilationUnit = StaticJavaParser.parse(new FileInputStream(filePath.toAbsolutePath().toString()));
             
             /**
@@ -56,6 +63,10 @@ public class App {
                 .stream()
                 .forEach(forEachStmt -> {
                     ExpressionStmt eStmt = new ExpressionStmt();
+                    Optional<Comment> comment = forEachStmt.getComment();
+                    if (comment.isPresent()) {
+                        eStmt.setComment(comment.get());
+                    }
 
                     NameExpr iterableExpression = forEachStmt.getIterable().asNameExpr();
 
@@ -107,6 +118,13 @@ public class App {
 
                     forEachStmt.replace(eStmt);
                 });
+
+                compilationUnit.findAll(ForStmt.class)
+                .stream()
+                .forEach(forStmt -> {
+                    System.out.println(forStmt);
+                });
+
             System.out.println(compilationUnit);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
