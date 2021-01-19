@@ -1,6 +1,7 @@
 package org.brunel.fyp.langserver;
 
 import org.brunel.fyp.langserver.refactorings.ForEachRefactoringPattern;
+import org.brunel.fyp.langserver.refactorings.ForLoopRefactoringPattern;
 import org.eclipse.lsp4j.DidChangeConfigurationParams;
 import org.eclipse.lsp4j.DidChangeWatchedFilesParams;
 import org.eclipse.lsp4j.ExecuteCommandParams;
@@ -20,6 +21,7 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.stmt.ForEachStmt;
+import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.printer.PrettyPrinterConfiguration;
 
 public class MJGAWorkspaceService implements WorkspaceService {
@@ -39,6 +41,12 @@ public class MJGAWorkspaceService implements WorkspaceService {
                     StaticJavaParser.setConfiguration(parserConfig);
                     compilationUnit = StaticJavaParser.parse(new FileInputStream(filePath));
                     variableDeclarationExprs = compilationUnit.findAll(VariableDeclarator.class);
+                    compilationUnit.findAll(ForStmt.class)
+                        .stream()
+                        .forEach(forStmt -> {
+                            compilationUnit = new ForLoopRefactoringPattern().refactor(forStmt, compilationUnit);
+                        });
+
                     compilationUnit.findAll(ForEachStmt.class)
                         .stream()
                         .forEach(forEachStmt -> {

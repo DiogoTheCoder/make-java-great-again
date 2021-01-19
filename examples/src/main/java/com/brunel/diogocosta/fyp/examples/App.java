@@ -42,13 +42,13 @@ import com.github.javaparser.ast.type.UnknownType;
 public class App {
     private static Logger logger;
     private static final Integer SEQUENCE_SIZE = 10000;
+    private static CompilationUnit compilationUnit;
 
     public static void main(String[] args) {
         /**
          * Testing refactoring code
          */
         Path filePath = Paths.get("src\\main\\java\\com\\brunel\\diogocosta\\fyp\\examples\\Refactor.java");
-        CompilationUnit compilationUnit;
         try {
             ParserConfiguration parserConfig = new ParserConfiguration();
             parserConfig.setAttributeComments(true);
@@ -158,7 +158,7 @@ public class App {
                     methodCallExprIntStream.setScope(nameExprIntStream);
                     methodCallExprIntStream.setName(simpleNameRange);
 
-                    // Arrays.stream(name), forEach, "string -> {
+                    // IntStream.range(0, length), forEach, "string -> {
                     MethodCallExpr methodCallExpr = new MethodCallExpr();
 
                     // forEach
@@ -169,15 +169,46 @@ public class App {
                     // "string -> {
                     LambdaExpr lambdaExpr = new LambdaExpr(parameterString, (BlockStmt) forStmt.getBody());
 
-                    // Arrays.streams(name), "string ->
+                    // IntStream.range(0, length), "string ->
                     methodCallExpr.setArguments(new NodeList<Expression>(lambdaExpr));
 
-                    methodCallExpr.setScope(methodCallExprIntStream);
+                    // Is this a reverse for-loop?
+                    if (updateUnaryExprOperator.name().equals(Operator.PREFIX_DECREMENT.name()) || updateUnaryExprOperator.name().equals(Operator.POSTFIX_DECREMENT.name()) ) {
+                        // .boxed()
+                        MethodCallExpr methodCallExprBoxed = new MethodCallExpr();
+                        // boxed
+                        methodCallExprBoxed.setName(new SimpleName("boxed"));
+
+                        methodCallExprBoxed.setParentNode(methodCallExprIntStream);
+                        methodCallExprBoxed.setScope(methodCallExprIntStream);
+
+                        // Collections.reverseOrder()
+                        MethodCallExpr methodCallExprCollections = new MethodCallExpr();
+                        SimpleName simpleNameReverseOrder = new SimpleName("reverseOrder");
+                        NameExpr nameExprCollections = new NameExpr(new SimpleName("Collections"));
+    
+                        nameExprCollections.setParentNode(methodCallExprCollections);
+                        methodCallExprCollections.setName(simpleNameReverseOrder);
+                        methodCallExprCollections.setScope(nameExprCollections);
+
+                        // Let's combine the methods .boxed() and .sorted() into the same parent
+                        MethodCallExpr methodCallExprBoxedPlusCollections = new MethodCallExpr();
+                        methodCallExprBoxedPlusCollections.setName(new SimpleName("sorted"));
+
+                        methodCallExprBoxed.setParentNode(methodCallExprBoxedPlusCollections);
+                        methodCallExprCollections.setParentNode(methodCallExprBoxedPlusCollections);
+                        methodCallExprBoxedPlusCollections.setScope(methodCallExprBoxed);
+
+                        // add Collections.reverseOrder() to arguments
+                        methodCallExprBoxedPlusCollections.setArguments(new NodeList<Expression>(methodCallExprCollections));
+
+                        methodCallExpr.setScope(methodCallExprBoxedPlusCollections);
+                    } else {
+                        methodCallExpr.setScope(methodCallExprIntStream);
+                    }
 
                     eStmt.setExpression(methodCallExpr);
-
                     forStmt.replace(eStmt);
-                    //System.out.println(compilationUnit);
                 });
 
             System.out.println(compilationUnit);
