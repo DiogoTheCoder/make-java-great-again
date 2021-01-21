@@ -4,7 +4,6 @@ import { Commands } from './commands';
 import { displaySyntaxTree } from './commands/displaySyntaxTree';
 import { refactorFile } from './commands/refactorFile';
 import { LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-languageclient';
-import os from 'os';
 
 let client: LanguageClient;
 
@@ -19,7 +18,7 @@ export function activate(context: vscode.ExtensionContext) {
   let classPath = path.join(__dirname, '..', 'launcher', 'target', 'launcher.jar');
   const args: string[] = ['-cp', classPath];
 
-  const command = os.platform() === 'win32' ? 'java' : 'which java';
+  const command = 'java';
 
   // Set the server options 
   // -- java execution path
