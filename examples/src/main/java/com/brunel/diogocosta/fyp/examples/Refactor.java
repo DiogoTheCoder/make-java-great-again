@@ -1,14 +1,18 @@
 package com.brunel.diogocosta.fyp.examples;
 
-import java.util.stream.IntStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class Refactor {
 
   public static void main(String[] args) {
-    String[] name = { "Diogo", "Costa" };
+    String[] name1 = { "Diogo", "Costa" };
+    List<String> name2 = Arrays.asList("Maria", "Costa");
+    ArrayList<String> name3 = new ArrayList<>(List.of("John", "Smith"));
 
-    for (int i = 0; i < name.length; i++) {
-      System.out.println(name[i]);
+    for (String name : name2) {
+      System.out.println(name);
     }
   }
 }

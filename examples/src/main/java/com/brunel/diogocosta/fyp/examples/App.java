@@ -42,6 +42,7 @@ import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ForEachStmt;
 import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.ast.stmt.Statement;
+import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.type.UnknownType;
 
@@ -77,8 +78,8 @@ public class App {
             // expressionStmt.getChildNodes().get(0);
 
             App.variableDeclarationExprs = compilationUnit.findAll(VariableDeclarator.class);
-            compilationUnit.findAll(ForStmt.class).stream().forEach(forStmt -> {
-                refactor(forStmt, compilationUnit);
+            compilationUnit.findAll(ForEachStmt.class).stream().forEach(forEachStmt -> {
+                refactor(forEachStmt, compilationUnit);
             });
 
             System.out.println(compilationUnit);
@@ -124,12 +125,12 @@ public class App {
     }
 
     private static CompilationUnit refactor(Node node, CompilationUnit compilationUnit) {
-        ExpressionStmt expression = convertToMap((ForStmt) node);
-        if (expression != null) {
-            node.replace(expression);
-        }
+        ExpressionStmt expression;
+        // if (expression != null) {
+        //     node.replace(expression);
+        // }
 
-        expression = convertToForEach((ForStmt) node);
+        expression = convertToForEach((ForEachStmt) node);
         if (expression != null) {
             node.replace(expression);
         }
@@ -214,45 +215,33 @@ public class App {
         return replacingExpressionStmt;
     }
 
-    private static ExpressionStmt convertToForEach(ForStmt forStmt) {
+    private static ExpressionStmt convertToForEach(ForEachStmt forEachStmt) {
         ExpressionStmt replacingExpressionStmt = new ExpressionStmt();
 
-        // Get the starting index
-        VariableDeclarationExpr initialisationVariableDeclarationExpr = forStmt.getInitialization().getFirst().get().asVariableDeclarationExpr();
-        Optional<VariableDeclarator> variableDeclarator = initialisationVariableDeclarationExpr.findFirst(VariableDeclarator.class);
-        if (variableDeclarator.isEmpty()) {
-            // Something is wrong, abandon!
+        // Workout which type of Array/List is this
+        NameExpr arrayVariable = forEachStmt.getIterable().asNameExpr();
+        Optional<VariableDeclarator> arrayDeclaratorOptional = variableDeclarationExprs
+            .stream()
+            .filter(variable -> variable.getName().getIdentifier()
+            .equals(arrayVariable.getName().getIdentifier()))
+            .findFirst();
+
+        if (arrayDeclaratorOptional.isEmpty()) {
+            // Array not declared, wtf o_o
             return null;
         }
 
-        // "int i = 0;", get me the 1st element, i.e. the variable name
-        String elementVariable = variableDeclarator.get().getChildNodes().get(1).toString();
-        if (elementVariable == null || elementVariable.isEmpty()) {
-            return null;
+        String template = "%s.forEach(%s -> %s)";
+        Type arrayType = arrayDeclaratorOptional.get().getType();
+        if (arrayType.getClass().equals(ArrayType.class)) {
+            // e.g. String[]
+            template = "Arrays.stream(%s).forEach(%s -> %s)";
+            compilationUnit.addImport(java.util.Arrays.class);
         }
 
-        Optional<IntegerLiteralExpr> startingIndexOptional = initialisationVariableDeclarationExpr.findFirst(IntegerLiteralExpr.class);
-        if (startingIndexOptional.isEmpty()) {
-            // Something is wrong, abandon!
-            return null;
-        }
-
-        String startingIndex = startingIndexOptional.get().getValue();
-
-        // Right side of the comparsion usually has the end index
-        String endIndex = forStmt.getCompare().get().asBinaryExpr().getRight().toString();
-
-        String template = String.format("IntStream.range(%s, %s).forEach((%s) -> %s )",
-            startingIndex,
-            endIndex,
-            elementVariable,
-            forStmt.getBody().toString()
-        );
-
+        template = String.format(template, arrayVariable.toString(), forEachStmt.getVariableDeclarator().toString(), forEachStmt.getBody().toString());
         Expression templateExpression = StaticJavaParser.parseExpression(template);
         replacingExpressionStmt.setExpression(templateExpression);
-
-        compilationUnit.addImport(java.util.stream.IntStream.class);
 
         return replacingExpressionStmt;
     }
