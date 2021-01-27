@@ -140,6 +140,19 @@ public class App {
     private static ExpressionStmt convertToMap(ForStmt forStmt) {
         ExpressionStmt replacingExpressionStmt = new ExpressionStmt();
 
+        // Are we starting from index 0?
+        VariableDeclarationExpr initialisationVariableDeclarationExpr = forStmt.getInitialization().getFirst().get().asVariableDeclarationExpr();
+        Optional<IntegerLiteralExpr> startingIndexOptional = initialisationVariableDeclarationExpr.findFirst(IntegerLiteralExpr.class);
+        if (startingIndexOptional.isEmpty()) {
+            // Something is wrong, abandon!
+        }
+
+        Integer startingIndex = Integer.valueOf(startingIndexOptional.get().getValue());
+        if (startingIndex > 0) {
+            // The index doesn't start at 0, abandon ship!
+            return null;
+        }
+
         // Are we looping the entire array?
         Optional<MethodCallExpr> arraySizeCallOptional = forStmt.findFirst(MethodCallExpr.class);
         if (arraySizeCallOptional.isEmpty()) {
@@ -202,88 +215,46 @@ public class App {
     }
 
     private static ExpressionStmt convertToForEach(ForStmt forStmt) {
+        ExpressionStmt replacingExpressionStmt = new ExpressionStmt();
+
+        // Get the starting index
         VariableDeclarationExpr initialisationVariableDeclarationExpr = forStmt.getInitialization().getFirst().get().asVariableDeclarationExpr();
-        VariableDeclarator initialisationVariableDeclarator = initialisationVariableDeclarationExpr.getVariables().getFirst().get();
-        IntegerLiteralExpr integerLiteralExpr = initialisationVariableDeclarator.getInitializer().get().asIntegerLiteralExpr();
-
-        BinaryExpr comparisonBinaryExpr = forStmt.getCompare().get().asBinaryExpr();
-        Expression comparisonRightExpression = comparisonBinaryExpr.getRight();
-
-        UnaryExpr updateUnaryExpr = forStmt.getUpdate().getFirst().get().asUnaryExpr();
-        Operator updateUnaryExprOperator = updateUnaryExpr.getOperator();
-
-        ExpressionStmt eStmt = new ExpressionStmt();
-        Optional<Comment> comment = forStmt.getComment();
-        if (comment.isPresent()) {
-            eStmt.setComment(comment.get());
+        Optional<VariableDeclarator> variableDeclarator = initialisationVariableDeclarationExpr.findFirst(VariableDeclarator.class);
+        if (variableDeclarator.isEmpty()) {
+            // Something is wrong, abandon!
+            return null;
         }
 
-        // IntStream.range(0, length)
-        MethodCallExpr methodCallExprIntStream = new MethodCallExpr();
-        // range
-        SimpleName simpleNameRange = new SimpleName("range");
-
-        compilationUnit.addImport(new ImportDeclaration("java.util.stream.IntStream", false, false));
-        NameExpr nameExprIntStream = new NameExpr(new SimpleName("IntStream"));
-
-        // Name of the array to loop, argument for IntStream.range(startIndex, endIndex)
-        methodCallExprIntStream.setArguments(new NodeList<Expression>(integerLiteralExpr, comparisonRightExpression));
-
-        nameExprIntStream.setParentNode(methodCallExprIntStream);
-        methodCallExprIntStream.setScope(nameExprIntStream);
-        methodCallExprIntStream.setName(simpleNameRange);
-
-        // IntStream.range(0, length), forEach, "string -> {
-        MethodCallExpr methodCallExpr = new MethodCallExpr();
-
-        // forEach
-        methodCallExpr.setName(new SimpleName("forEach"));
-
-        // string
-        Parameter parameterString = new Parameter(new UnknownType(), initialisationVariableDeclarator.getName());
-        // "string -> {
-        LambdaExpr lambdaExpr = new LambdaExpr(parameterString, (BlockStmt) forStmt.getBody());
-
-        // IntStream.range(0, length), "string ->
-        methodCallExpr.setArguments(new NodeList<Expression>(lambdaExpr));
-
-        // Is this a reverse for-loop?
-        if (updateUnaryExprOperator.name().equals(Operator.PREFIX_DECREMENT.name()) || updateUnaryExprOperator.name().equals(Operator.POSTFIX_DECREMENT.name()) ) {
-            // .boxed()
-            MethodCallExpr methodCallExprBoxed = new MethodCallExpr();
-            // boxed
-            methodCallExprBoxed.setName(new SimpleName("boxed"));
-
-            methodCallExprBoxed.setParentNode(methodCallExprIntStream);
-            methodCallExprBoxed.setScope(methodCallExprIntStream);
-
-            // Collections.reverseOrder()
-            MethodCallExpr methodCallExprCollections = new MethodCallExpr();
-            SimpleName simpleNameReverseOrder = new SimpleName("reverseOrder");
-            NameExpr nameExprCollections = new NameExpr(new SimpleName("Collections"));
-
-            nameExprCollections.setParentNode(methodCallExprCollections);
-            methodCallExprCollections.setName(simpleNameReverseOrder);
-            methodCallExprCollections.setScope(nameExprCollections);
-
-            // Let's combine the methods .boxed() and .sorted() into the same parent
-            MethodCallExpr methodCallExprBoxedPlusCollections = new MethodCallExpr();
-            methodCallExprBoxedPlusCollections.setName(new SimpleName("sorted"));
-
-            methodCallExprBoxed.setParentNode(methodCallExprBoxedPlusCollections);
-            methodCallExprCollections.setParentNode(methodCallExprBoxedPlusCollections);
-            methodCallExprBoxedPlusCollections.setScope(methodCallExprBoxed);
-
-            // add Collections.reverseOrder() to arguments
-            methodCallExprBoxedPlusCollections.setArguments(new NodeList<Expression>(methodCallExprCollections));
-
-            methodCallExpr.setScope(methodCallExprBoxedPlusCollections);
-        } else {
-            methodCallExpr.setScope(methodCallExprIntStream);
+        // "int i = 0;", get me the 1st element, i.e. the variable name
+        String elementVariable = variableDeclarator.get().getChildNodes().get(1).toString();
+        if (elementVariable == null || elementVariable.isEmpty()) {
+            return null;
         }
 
-        eStmt.setExpression(methodCallExpr);
-        return eStmt;
+        Optional<IntegerLiteralExpr> startingIndexOptional = initialisationVariableDeclarationExpr.findFirst(IntegerLiteralExpr.class);
+        if (startingIndexOptional.isEmpty()) {
+            // Something is wrong, abandon!
+            return null;
+        }
+
+        String startingIndex = startingIndexOptional.get().getValue();
+
+        // Right side of the comparsion usually has the end index
+        String endIndex = forStmt.getCompare().get().asBinaryExpr().getRight().toString();
+
+        String template = String.format("IntStream.range(%s, %s).forEach((%s) -> %s )",
+            startingIndex,
+            endIndex,
+            elementVariable,
+            forStmt.getBody().toString()
+        );
+
+        Expression templateExpression = StaticJavaParser.parseExpression(template);
+        replacingExpressionStmt.setExpression(templateExpression);
+
+        compilationUnit.addImport(java.util.stream.IntStream.class);
+
+        return replacingExpressionStmt;
     }
 
     private static void forLoopIterate(ArrayList<Integer> list) {
