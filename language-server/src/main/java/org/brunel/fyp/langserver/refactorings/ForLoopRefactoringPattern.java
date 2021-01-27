@@ -4,27 +4,17 @@ import java.util.Optional;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.comments.Comment;
-import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.IntegerLiteralExpr;
-import com.github.javaparser.ast.expr.LambdaExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
-import com.github.javaparser.ast.expr.SimpleName;
-import com.github.javaparser.ast.expr.UnaryExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
-import com.github.javaparser.ast.expr.UnaryExpr.Operator;
-import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.ast.stmt.Statement;
-import com.github.javaparser.ast.type.UnknownType;
 
 import org.brunel.fyp.langserver.MJGARefactoringPattern;
 
@@ -66,15 +56,10 @@ public class ForLoopRefactoringPattern extends MJGARefactoringPattern {
             return null;
         }
 
-
         NodeList<Statement> bodyExpression = forStmt.getBody().asBlockStmt().getStatements();
         if (bodyExpression.size() == 1 && bodyExpression.get(0).isExpressionStmt()) {
-            Optional<Node> expressionStmtMethodCallOptional = bodyExpression
-                .get(0)
-                .getChildNodes()
-                .stream()
-                .filter(expression -> expression.getClass().equals(MethodCallExpr.class))
-                .findFirst();
+            Optional<Node> expressionStmtMethodCallOptional = bodyExpression.get(0).getChildNodes().stream()
+                    .filter(expression -> expression.getClass().equals(MethodCallExpr.class)).findFirst();
             if (expressionStmtMethodCallOptional.isEmpty()) {
                 return null;
             }
@@ -87,7 +72,8 @@ public class ForLoopRefactoringPattern extends MJGARefactoringPattern {
 
             String mapFunction = "";
 
-            // Build something like this: "array = array.stream().map(String::toUpperCase).collect(Collectors.toList())"
+            // Build something like this: "array =
+            // array.stream().map(String::toUpperCase).collect(Collectors.toList())"
             if (expressionStmtMethodCall.toString().contains(".toUpperCase()")) {
                 // We are trying to uppercase the elements of the list
                 mapFunction = "String::toUpperCase";
@@ -97,10 +83,7 @@ public class ForLoopRefactoringPattern extends MJGARefactoringPattern {
             }
 
             String template = String.format("%s = %s.stream().map(%s).collect(Collectors.toList())",
-                arrayNameOptional.get().toString(),
-                arrayNameOptional.get().toString(),
-                mapFunction
-            );
+                    arrayNameOptional.get().toString(), arrayNameOptional.get().toString(), mapFunction);
 
             Expression templateExpression = StaticJavaParser.parseExpression(template);
             replacingExpressionStmt.setExpression(templateExpression);
@@ -115,8 +98,10 @@ public class ForLoopRefactoringPattern extends MJGARefactoringPattern {
         ExpressionStmt replacingExpressionStmt = new ExpressionStmt();
 
         // Get the starting index
-        VariableDeclarationExpr initialisationVariableDeclarationExpr = forStmt.getInitialization().getFirst().get().asVariableDeclarationExpr();
-        Optional<VariableDeclarator> variableDeclarator = initialisationVariableDeclarationExpr.findFirst(VariableDeclarator.class);
+        VariableDeclarationExpr initialisationVariableDeclarationExpr = forStmt.getInitialization().getFirst().get()
+                .asVariableDeclarationExpr();
+        Optional<VariableDeclarator> variableDeclarator = initialisationVariableDeclarationExpr
+                .findFirst(VariableDeclarator.class);
         if (variableDeclarator.isEmpty()) {
             // Something is wrong, abandon!
             return null;
@@ -128,7 +113,8 @@ public class ForLoopRefactoringPattern extends MJGARefactoringPattern {
             return null;
         }
 
-        Optional<IntegerLiteralExpr> startingIndexOptional = initialisationVariableDeclarationExpr.findFirst(IntegerLiteralExpr.class);
+        Optional<IntegerLiteralExpr> startingIndexOptional = initialisationVariableDeclarationExpr
+                .findFirst(IntegerLiteralExpr.class);
         if (startingIndexOptional.isEmpty()) {
             // Something is wrong, abandon!
             return null;
@@ -139,12 +125,8 @@ public class ForLoopRefactoringPattern extends MJGARefactoringPattern {
         // Right side of the comparsion usually has the end index
         String endIndex = forStmt.getCompare().get().asBinaryExpr().getRight().toString();
 
-        String template = String.format("IntStream.range(%s, %s).forEach((%s) -> %s )",
-            startingIndex,
-            endIndex,
-            elementVariable,
-            forStmt.getBody().toString()
-        );
+        String template = String.format("IntStream.range(%s, %s).forEach((%s) -> %s )", startingIndex, endIndex,
+                elementVariable, forStmt.getBody().toString());
 
         Expression templateExpression = StaticJavaParser.parseExpression(template);
         replacingExpressionStmt.setExpression(templateExpression);
@@ -153,5 +135,5 @@ public class ForLoopRefactoringPattern extends MJGARefactoringPattern {
 
         return replacingExpressionStmt;
     }
-    
+
 }

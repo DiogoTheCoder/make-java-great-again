@@ -11,7 +11,7 @@ public class Refactor {
     List<String> name2 = Arrays.asList("Maria", "Costa");
     ArrayList<String> name3 = new ArrayList<>(List.of("John", "Smith"));
 
-    for (String name : name2) {
+    for (String name : name1) {
       System.out.println(name);
     }
   }
