@@ -42,6 +42,7 @@ import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ForEachStmt;
 import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.ast.stmt.Statement;
+import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.type.UnknownType;
 
@@ -77,8 +78,8 @@ public class App {
             // expressionStmt.getChildNodes().get(0);
 
             App.variableDeclarationExprs = compilationUnit.findAll(VariableDeclarator.class);
-            compilationUnit.findAll(ForStmt.class).stream().forEach(forStmt -> {
-                refactor(forStmt, compilationUnit);
+            compilationUnit.findAll(ForEachStmt.class).stream().forEach(forEachStmt -> {
+                refactor(forEachStmt, compilationUnit);
             });
 
             System.out.println(compilationUnit);
@@ -124,12 +125,12 @@ public class App {
     }
 
     private static CompilationUnit refactor(Node node, CompilationUnit compilationUnit) {
-        ExpressionStmt expression = convertToMap((ForStmt) node);
-        if (expression != null) {
-            node.replace(expression);
-        }
+        ExpressionStmt expression;
+        // if (expression != null) {
+        //     node.replace(expression);
+        // }
 
-        expression = convertToForEach((ForStmt) node);
+        expression = convertToForEach((ForEachStmt) node);
         if (expression != null) {
             node.replace(expression);
         }
@@ -139,6 +140,19 @@ public class App {
 
     private static ExpressionStmt convertToMap(ForStmt forStmt) {
         ExpressionStmt replacingExpressionStmt = new ExpressionStmt();
+
+        // Are we starting from index 0?
+        VariableDeclarationExpr initialisationVariableDeclarationExpr = forStmt.getInitialization().getFirst().get().asVariableDeclarationExpr();
+        Optional<IntegerLiteralExpr> startingIndexOptional = initialisationVariableDeclarationExpr.findFirst(IntegerLiteralExpr.class);
+        if (startingIndexOptional.isEmpty()) {
+            // Something is wrong, abandon!
+        }
+
+        Integer startingIndex = Integer.valueOf(startingIndexOptional.get().getValue());
+        if (startingIndex > 0) {
+            // The index doesn't start at 0, abandon ship!
+            return null;
+        }
 
         // Are we looping the entire array?
         Optional<MethodCallExpr> arraySizeCallOptional = forStmt.findFirst(MethodCallExpr.class);
@@ -201,89 +215,35 @@ public class App {
         return replacingExpressionStmt;
     }
 
-    private static ExpressionStmt convertToForEach(ForStmt forStmt) {
-        VariableDeclarationExpr initialisationVariableDeclarationExpr = forStmt.getInitialization().getFirst().get().asVariableDeclarationExpr();
-        VariableDeclarator initialisationVariableDeclarator = initialisationVariableDeclarationExpr.getVariables().getFirst().get();
-        IntegerLiteralExpr integerLiteralExpr = initialisationVariableDeclarator.getInitializer().get().asIntegerLiteralExpr();
+    private static ExpressionStmt convertToForEach(ForEachStmt forEachStmt) {
+        ExpressionStmt replacingExpressionStmt = new ExpressionStmt();
 
-        BinaryExpr comparisonBinaryExpr = forStmt.getCompare().get().asBinaryExpr();
-        Expression comparisonRightExpression = comparisonBinaryExpr.getRight();
+        // Workout which type of Array/List is this
+        NameExpr arrayVariable = forEachStmt.getIterable().asNameExpr();
+        Optional<VariableDeclarator> arrayDeclaratorOptional = variableDeclarationExprs
+            .stream()
+            .filter(variable -> variable.getName().getIdentifier()
+            .equals(arrayVariable.getName().getIdentifier()))
+            .findFirst();
 
-        UnaryExpr updateUnaryExpr = forStmt.getUpdate().getFirst().get().asUnaryExpr();
-        Operator updateUnaryExprOperator = updateUnaryExpr.getOperator();
-
-        ExpressionStmt eStmt = new ExpressionStmt();
-        Optional<Comment> comment = forStmt.getComment();
-        if (comment.isPresent()) {
-            eStmt.setComment(comment.get());
+        if (arrayDeclaratorOptional.isEmpty()) {
+            // Array not declared, wtf o_o
+            return null;
         }
 
-        // IntStream.range(0, length)
-        MethodCallExpr methodCallExprIntStream = new MethodCallExpr();
-        // range
-        SimpleName simpleNameRange = new SimpleName("range");
-
-        compilationUnit.addImport(new ImportDeclaration("java.util.stream.IntStream", false, false));
-        NameExpr nameExprIntStream = new NameExpr(new SimpleName("IntStream"));
-
-        // Name of the array to loop, argument for IntStream.range(startIndex, endIndex)
-        methodCallExprIntStream.setArguments(new NodeList<Expression>(integerLiteralExpr, comparisonRightExpression));
-
-        nameExprIntStream.setParentNode(methodCallExprIntStream);
-        methodCallExprIntStream.setScope(nameExprIntStream);
-        methodCallExprIntStream.setName(simpleNameRange);
-
-        // IntStream.range(0, length), forEach, "string -> {
-        MethodCallExpr methodCallExpr = new MethodCallExpr();
-
-        // forEach
-        methodCallExpr.setName(new SimpleName("forEach"));
-
-        // string
-        Parameter parameterString = new Parameter(new UnknownType(), initialisationVariableDeclarator.getName());
-        // "string -> {
-        LambdaExpr lambdaExpr = new LambdaExpr(parameterString, (BlockStmt) forStmt.getBody());
-
-        // IntStream.range(0, length), "string ->
-        methodCallExpr.setArguments(new NodeList<Expression>(lambdaExpr));
-
-        // Is this a reverse for-loop?
-        if (updateUnaryExprOperator.name().equals(Operator.PREFIX_DECREMENT.name()) || updateUnaryExprOperator.name().equals(Operator.POSTFIX_DECREMENT.name()) ) {
-            // .boxed()
-            MethodCallExpr methodCallExprBoxed = new MethodCallExpr();
-            // boxed
-            methodCallExprBoxed.setName(new SimpleName("boxed"));
-
-            methodCallExprBoxed.setParentNode(methodCallExprIntStream);
-            methodCallExprBoxed.setScope(methodCallExprIntStream);
-
-            // Collections.reverseOrder()
-            MethodCallExpr methodCallExprCollections = new MethodCallExpr();
-            SimpleName simpleNameReverseOrder = new SimpleName("reverseOrder");
-            NameExpr nameExprCollections = new NameExpr(new SimpleName("Collections"));
-
-            nameExprCollections.setParentNode(methodCallExprCollections);
-            methodCallExprCollections.setName(simpleNameReverseOrder);
-            methodCallExprCollections.setScope(nameExprCollections);
-
-            // Let's combine the methods .boxed() and .sorted() into the same parent
-            MethodCallExpr methodCallExprBoxedPlusCollections = new MethodCallExpr();
-            methodCallExprBoxedPlusCollections.setName(new SimpleName("sorted"));
-
-            methodCallExprBoxed.setParentNode(methodCallExprBoxedPlusCollections);
-            methodCallExprCollections.setParentNode(methodCallExprBoxedPlusCollections);
-            methodCallExprBoxedPlusCollections.setScope(methodCallExprBoxed);
-
-            // add Collections.reverseOrder() to arguments
-            methodCallExprBoxedPlusCollections.setArguments(new NodeList<Expression>(methodCallExprCollections));
-
-            methodCallExpr.setScope(methodCallExprBoxedPlusCollections);
-        } else {
-            methodCallExpr.setScope(methodCallExprIntStream);
+        String template = "%s.forEach(%s -> %s)";
+        Type arrayType = arrayDeclaratorOptional.get().getType();
+        if (arrayType.getClass().equals(ArrayType.class)) {
+            // e.g. String[]
+            template = "Arrays.stream(%s).forEach(%s -> %s)";
+            compilationUnit.addImport(java.util.Arrays.class);
         }
 
-        eStmt.setExpression(methodCallExpr);
-        return eStmt;
+        template = String.format(template, arrayVariable.toString(), forEachStmt.getVariableDeclarator().toString(), forEachStmt.getBody().toString());
+        Expression templateExpression = StaticJavaParser.parseExpression(template);
+        replacingExpressionStmt.setExpression(templateExpression);
+
+        return replacingExpressionStmt;
     }
 
     private static void forLoopIterate(ArrayList<Integer> list) {
