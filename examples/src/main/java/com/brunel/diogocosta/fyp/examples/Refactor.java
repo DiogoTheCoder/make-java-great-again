@@ -12,8 +12,10 @@ public class Refactor {
     ArrayList<String> name3 = new ArrayList<>(List.of("John", "Smith"));
 
     String result = "";
-    for (int i = 0; i < name1.length; i++) {
-      result += name1[i];
+    for (String string : name2) {
+      result += string + ", ";
     }
+
+    System.out.println(result);
   }
 }
