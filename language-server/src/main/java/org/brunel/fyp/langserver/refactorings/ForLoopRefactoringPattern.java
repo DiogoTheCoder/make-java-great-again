@@ -8,10 +8,12 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.IntegerLiteralExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
+import com.github.javaparser.ast.expr.UnaryExpr.Operator;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.ast.stmt.Statement;
@@ -113,20 +115,56 @@ public class ForLoopRefactoringPattern extends MJGARefactoringPattern {
             return null;
         }
 
+        String startingIndex;
         Optional<IntegerLiteralExpr> startingIndexOptional = initialisationVariableDeclarationExpr
                 .findFirst(IntegerLiteralExpr.class);
         if (startingIndexOptional.isEmpty()) {
-            // Something is wrong, abandon!
-            return null;
+            // The startingIndexOptional is not a raw number, is it a variable?
+            // check for FieldAccessExpr
+            Optional<FieldAccessExpr> startingIndexVariableOptional = initialisationVariableDeclarationExpr
+                .findFirst(FieldAccessExpr.class);
+            if (startingIndexVariableOptional.isEmpty()) {
+                // If its not a variable, it might be a method call instead, like .size()
+                Optional<MethodCallExpr> startingIndexMethodOptional = initialisationVariableDeclarationExpr
+                    .findFirst(MethodCallExpr.class);
+                if (startingIndexMethodOptional.isEmpty()) {
+                    return null;
+                } else {
+                    startingIndex = startingIndexMethodOptional.get().toString();
+                }
+            } else {
+                startingIndex = startingIndexVariableOptional.get().toString();
+            }
+        } else {
+            startingIndex = startingIndexOptional.get().getValue();
         }
-
-        String startingIndex = startingIndexOptional.get().getValue();
 
         // Right side of the comparsion usually has the end index
         String endIndex = forStmt.getCompare().get().asBinaryExpr().getRight().toString();
 
-        String template = String.format("IntStream.range(%s, %s).forEach((%s) -> %s )", startingIndex, endIndex,
+        Optional<Expression> updateOptional = forStmt.getUpdate().getFirst();
+        if (updateOptional.isEmpty()) {
+            // Has no update, e.g. i++ or i--, wtf :/
+            return null;
+        }
+
+        Operator updateOperator = updateOptional.get().asUnaryExpr().getOperator();
+        String template = "";
+        if (updateOperator.equals(Operator.POSTFIX_DECREMENT) || updateOperator.equals(Operator.PREFIX_DECREMENT)) {
+            // We are likely reversing a for loop
+            template = String.format(
+                "IntStream.range(%s + 1, %s + 1).boxed().sorted(Comparator.reverseOrder()).forEach((%s) -> %s )",
+                endIndex,
+                startingIndex,
+                elementVariable,
+                forStmt.getBody().toString()
+            );
+
+            compilationUnit.addImport(java.util.Comparator.class);
+        } else {
+            template = String.format("IntStream.range(%s, %s).forEach((%s) -> %s )", startingIndex, endIndex,
                 elementVariable, forStmt.getBody().toString());
+        }
 
         Expression templateExpression = StaticJavaParser.parseExpression(template);
         replacingExpressionStmt.setExpression(templateExpression);
