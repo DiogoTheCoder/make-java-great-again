@@ -29,6 +29,7 @@
         </dependency>
     </dependencies>
     <modules>
+        <module>examples</module>
         <module>language-server</module>
         <module>launcher</module>
     </modules>

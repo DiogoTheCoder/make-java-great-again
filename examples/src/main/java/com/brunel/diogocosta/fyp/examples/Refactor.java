@@ -11,8 +11,11 @@ public class Refactor {
     List<String> name2 = Arrays.asList("Maria", "Costa");
     ArrayList<String> name3 = new ArrayList<>(List.of("John", "Smith"));
 
-    for (int i = name3.size(); i > 0; i--) {
-      System.out.println(name2.get(i - 1));
+    String result = "";
+    for (String string : name2) {
+      result += string + ", ";
     }
+
+    System.out.println(result);
   }
 }
