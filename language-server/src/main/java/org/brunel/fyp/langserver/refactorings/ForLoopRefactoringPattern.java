@@ -20,7 +20,7 @@ import com.github.javaparser.ast.stmt.Statement;
 
 import org.brunel.fyp.langserver.MJGARefactoringPattern;
 
-public class ForLoopRefactoringPattern extends MJGARefactoringPattern {
+public class ForLoopRefactoringPattern implements MJGARefactoringPattern {
 
     @Override
     public CompilationUnit refactor(Node node, CompilationUnit compilationUnit) {
