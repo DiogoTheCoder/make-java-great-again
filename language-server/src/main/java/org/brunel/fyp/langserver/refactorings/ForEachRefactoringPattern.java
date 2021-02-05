@@ -17,7 +17,7 @@ import com.github.javaparser.ast.type.Type;
 import org.brunel.fyp.langserver.MJGARefactoringPattern;
 import org.brunel.fyp.langserver.MJGAWorkspaceService;
 
-public class ForEachRefactoringPattern extends MJGARefactoringPattern {
+public class ForEachRefactoringPattern implements MJGARefactoringPattern {
 
     @Override
     public CompilationUnit refactor(Node node, CompilationUnit compilationUnit) {
@@ -43,6 +43,24 @@ public class ForEachRefactoringPattern extends MJGARefactoringPattern {
             return null;
         }
 
+        NameExpr assignExpression = assignOptional.get().getTarget().asNameExpr();
+        Optional<VariableDeclarator> assignDeclaratorOptional = MJGAWorkspaceService.variableDeclarationExprs
+            .stream()
+            .filter(variable -> variable.getName().getIdentifier()
+            .equals(assignExpression.getName().getIdentifier()))
+            .findFirst();
+
+        if (assignDeclaratorOptional.isEmpty()) {
+            // Cannot find the result variable declaration!?
+            return null;
+        }
+
+        Optional<Expression> assignDeclaratorOptionalInitializer = assignDeclaratorOptional.get().getInitializer();
+        if (assignDeclaratorOptionalInitializer.isEmpty()) {
+            // Result variable wasn't been initialised, hmmm...
+            return null;
+        }
+
         AssignExpr.Operator assignOperator = assignOptional.get().getOperator();
         if (!assignOperator.equals(AssignExpr.Operator.PLUS)) {
             return null;
@@ -61,11 +79,11 @@ public class ForEachRefactoringPattern extends MJGARefactoringPattern {
             return null;
         }
 
-        String template = "%s = %s.stream().reduce(\"\", (partial, %s) -> partial + %s)";
+        String template = "%s = %s.reduce(%s, (partial, %s) -> partial + %s)";
         Type arrayType = arrayDeclaratorOptional.get().getType();
         if (arrayType.getClass().equals(ArrayType.class)) {
             // e.g. String[]
-            template = "%s = Arrays.stream(%s).reduce(\"\", (partial, %s) -> partial + %s)";
+            template = "%s = Arrays.stream(%s).reduce(%s, (partial, %s) -> partial + %s)";
             compilationUnit.addImport(java.util.Arrays.class);
         }
 
@@ -73,10 +91,11 @@ public class ForEachRefactoringPattern extends MJGARefactoringPattern {
             template,
             assignOptional.get().getTarget().toString(),
             arrayVariable.toString(),
+            assignDeclaratorOptionalInitializer.get().toString(),
             forEachStmt.getVariableDeclarator().toString(),
             assignOptional.get().getValue()
         );
-
+        
         Expression templateExpression = StaticJavaParser.parseExpression(template);
         replacingExpressionStmt.setExpression(templateExpression);
 
