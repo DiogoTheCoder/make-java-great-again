@@ -38,6 +38,7 @@ public class MJGAWorkspaceService implements WorkspaceService {
                 try {
                     ParserConfiguration parserConfig = new ParserConfiguration();
                     parserConfig.setIgnoreAnnotationsWhenAttributingComments(true);
+                    parserConfig.setDoNotAssignCommentsPrecedingEmptyLines(true);
                     StaticJavaParser.setConfiguration(parserConfig);
                     compilationUnit = StaticJavaParser.parse(new FileInputStream(filePath));
                     variableDeclarationExprs = compilationUnit.findAll(VariableDeclarator.class);

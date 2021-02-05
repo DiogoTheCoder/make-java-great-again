@@ -12,11 +12,13 @@ public class Refactor {
     List<String> name2 = Arrays.asList("Maria", "Costa");
     ArrayList<String> name3 = new ArrayList<>(List.of("John", "Smith"));
 
+    // For each loop, appending array elements
     String result = "";
     for (String string : name1) {
       result += string + ", ";
     }
 
+    // For each loop, counting array elements
     int count = 0;
     for (int num : int1) {
       count += num;
