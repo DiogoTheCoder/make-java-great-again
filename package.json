@@ -18,12 +18,12 @@
     "commands": [
       {
         "command": "make-java-great-again.refactorFile",
-        "category": "MJGA",
+        "category": "Make Java Great Again",
         "title": "Refactor File"
       },
       {
         "command": "make-java-great-again.displaySyntaxTree",
-        "category": "MJGA",
+        "category": "Make Java Great Again",
         "title": "Display Simple Abstract Syntax Tree"
       }
     ],
@@ -49,14 +49,26 @@
       }
     ],
     "configuration": {
-      "type": "object",
-      "title": "Example configuration",
+      "title": "Make Java Great Again",
       "properties": {
-        "java.maxNumberOfProblems": {
-          "scope": "resource",
-          "type": "number",
-          "default": 100,
-          "description": "Controls the maximum number of problems produced by the server."
+          "java.reduce.operators": {
+            "type": "array",
+            "markdownDescription": "The operators used by the Language Server to help determine whether or not to refactor to *Reduce*.\n\nSupported:\n\nASSIGN: **=**, PLUS: **+=**, MINUS: **-=**, MULTIPLY: ***=**, DIVIDE: **/=**, REMAINDER: **%=**\n\nBINARY_AND: **&=**, BINARY_OR: **|=**, XOR: **^=**\n\nLEFT_SHIFT: **<<=**, SIGNED_RIGHT_SHIFT: **>>=**, UNSIGNED_RIGHT_SHIFT: **>>>=**\n\n",
+            "default": [
+              "PLUS",
+              "MINUS",
+              "MULTIPLY",
+              "DIVIDE"
+            ],
+            "items": {
+                "type": "string",
+                "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "Operator"
+                    }
+                }
+            }
         },
         "java.trace.server": {
           "scope": "window",
@@ -67,7 +79,7 @@
             "verbose"
           ],
           "default": "verbose",
-          "description": "Traces the communication between VS Code and the language server."
+          "description": "Traces the communication between VS Code and the Language Server."
         }
       }
     }
