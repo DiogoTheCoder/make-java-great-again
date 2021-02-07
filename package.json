@@ -17,6 +17,11 @@
   "contributes": {
     "commands": [
       {
+        "command": "make-java-great-again.configure",
+        "category": "Make Java Great Again",
+        "title": "Configure"
+      },
+      {
         "command": "make-java-great-again.refactorFile",
         "category": "Make Java Great Again",
         "title": "Refactor File"
