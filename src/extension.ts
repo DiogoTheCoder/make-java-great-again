@@ -7,6 +7,7 @@ import {
 } from 'vscode-languageclient';
 import { Commands } from './commands';
 import { displaySyntaxTree } from './commands/displaySyntaxTree';
+import loadSettingsWindow from './commands/loadSettingsWindow';
 import { refactorFile } from './commands/refactorFile';
 
 let client: LanguageClient;
@@ -52,16 +53,20 @@ export function activate(context: vscode.ExtensionContext) {
     serverOptions,
     clientOptions,
   );
+
   let disposable = client.start();
 
   context.subscriptions.push(
     disposable,
-    vscode.commands.registerCommand(Commands.REFACTOR_FILE, () => {
-      refactorFile(client);
-    }),
-    vscode.commands.registerCommand(Commands.DISPLAY_AST, () => {
-      displaySyntaxTree();
-    }),
+    vscode.commands.registerCommand(Commands.CONFIGURE, () =>
+      loadSettingsWindow(),
+    ),
+    vscode.commands.registerCommand(Commands.REFACTOR_FILE, () =>
+      refactorFile(client),
+    ),
+    vscode.commands.registerCommand(Commands.DISPLAY_AST, () =>
+      displaySyntaxTree(),
+    ),
   );
 }
 
