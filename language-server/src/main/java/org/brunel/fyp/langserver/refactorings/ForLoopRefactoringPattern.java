@@ -42,7 +42,7 @@ public class ForLoopRefactoringPattern implements MJGARefactoringPattern {
 
         // Are we looping the entire array?
         Optional<MethodCallExpr> arraySizeCallOptional = forStmt.findFirst(MethodCallExpr.class);
-        if (arraySizeCallOptional.isEmpty()) {
+        if (!arraySizeCallOptional.isPresent()) {
             // Not a list, could be an array instead
             return null;
         }
@@ -54,7 +54,7 @@ public class ForLoopRefactoringPattern implements MJGARefactoringPattern {
         }
 
         Optional<NameExpr> arrayNameOptional = arraySizeCall.findFirst(NameExpr.class);
-        if (arrayNameOptional.isEmpty()) {
+        if (!arrayNameOptional.isPresent()) {
             return null;
         }
 
@@ -62,7 +62,7 @@ public class ForLoopRefactoringPattern implements MJGARefactoringPattern {
         if (bodyExpression.size() == 1 && bodyExpression.get(0).isExpressionStmt()) {
             Optional<Node> expressionStmtMethodCallOptional = bodyExpression.get(0).getChildNodes().stream()
                     .filter(expression -> expression.getClass().equals(MethodCallExpr.class)).findFirst();
-            if (expressionStmtMethodCallOptional.isEmpty()) {
+            if (!expressionStmtMethodCallOptional.isPresent()) {
                 return null;
             }
 
@@ -104,7 +104,7 @@ public class ForLoopRefactoringPattern implements MJGARefactoringPattern {
                 .asVariableDeclarationExpr();
         Optional<VariableDeclarator> variableDeclarator = initialisationVariableDeclarationExpr
                 .findFirst(VariableDeclarator.class);
-        if (variableDeclarator.isEmpty()) {
+        if (!variableDeclarator.isPresent()) {
             // Something is wrong, abandon!
             return null;
         }
@@ -118,16 +118,16 @@ public class ForLoopRefactoringPattern implements MJGARefactoringPattern {
         String startingIndex;
         Optional<IntegerLiteralExpr> startingIndexOptional = initialisationVariableDeclarationExpr
                 .findFirst(IntegerLiteralExpr.class);
-        if (startingIndexOptional.isEmpty()) {
+        if (!startingIndexOptional.isPresent()) {
             // The startingIndexOptional is not a raw number, is it a variable?
             // check for FieldAccessExpr
             Optional<FieldAccessExpr> startingIndexVariableOptional = initialisationVariableDeclarationExpr
                 .findFirst(FieldAccessExpr.class);
-            if (startingIndexVariableOptional.isEmpty()) {
+            if (!startingIndexVariableOptional.isPresent()) {
                 // If its not a variable, it might be a method call instead, like .size()
                 Optional<MethodCallExpr> startingIndexMethodOptional = initialisationVariableDeclarationExpr
                     .findFirst(MethodCallExpr.class);
-                if (startingIndexMethodOptional.isEmpty()) {
+                if (!startingIndexMethodOptional.isPresent()) {
                     return null;
                 } else {
                     startingIndex = startingIndexMethodOptional.get().toString();
@@ -143,7 +143,7 @@ public class ForLoopRefactoringPattern implements MJGARefactoringPattern {
         String endIndex = forStmt.getCompare().get().asBinaryExpr().getRight().toString();
 
         Optional<Expression> updateOptional = forStmt.getUpdate().getFirst();
-        if (updateOptional.isEmpty()) {
+        if (!updateOptional.isPresent()) {
             // Has no update, e.g. i++ or i--, wtf :/
             return null;
         }
