@@ -39,7 +39,7 @@ public class ForEachRefactoringPattern implements MJGARefactoringPattern {
 
         // Should we use reduce? Are we re-assinging and appending?
         Optional<AssignExpr> assignOptional = forEachStmt.findFirst(AssignExpr.class);
-        if (assignOptional.isEmpty()) {
+        if (!assignOptional.isPresent()) {
             return null;
         }
 
@@ -50,13 +50,13 @@ public class ForEachRefactoringPattern implements MJGARefactoringPattern {
             .equals(assignExpression.getName().getIdentifier()))
             .findFirst();
 
-        if (assignDeclaratorOptional.isEmpty()) {
+        if (!assignDeclaratorOptional.isPresent()) {
             // Cannot find the result variable declaration!?
             return null;
         }
 
         Optional<Expression> assignDeclaratorOptionalInitializer = assignDeclaratorOptional.get().getInitializer();
-        if (assignDeclaratorOptionalInitializer.isEmpty()) {
+        if (!assignDeclaratorOptionalInitializer.isPresent()) {
             // Result variable wasn't been initialised, hmmm...
             return null;
         }
@@ -74,7 +74,7 @@ public class ForEachRefactoringPattern implements MJGARefactoringPattern {
             .equals(arrayVariable.getName().getIdentifier()))
             .findFirst();
 
-        if (arrayDeclaratorOptional.isEmpty()) {
+        if (!arrayDeclaratorOptional.isPresent()) {
             // Array not declared, wtf o_o
             return null;
         }
@@ -113,7 +113,7 @@ public class ForEachRefactoringPattern implements MJGARefactoringPattern {
             .equals(arrayVariable.getName().getIdentifier()))
             .findFirst();
 
-        if (arrayDeclaratorOptional.isEmpty()) {
+        if (!arrayDeclaratorOptional.isPresent()) {
             // Array not declared, wtf o_o
             return null;
         }
