@@ -1,6 +1,6 @@
+import * as vscode from 'vscode';
 import { getEditor, writeCode } from '../utils';
 import { LanguageClient } from 'vscode-languageclient';
-import * as vscode from 'vscode';
 
 export async function refactorFile(client: LanguageClient): Promise<void> {
   const activeTextEditor = getEditor();
@@ -12,7 +12,10 @@ export async function refactorFile(client: LanguageClient): Promise<void> {
     throw Error('No active Java file');
   }
 
-  let transformedCode = await vscode.commands.executeCommand('mjga.langserver.refactorFile', activeTextEditor.document.uri.fsPath);
+  let transformedCode = await vscode.commands.executeCommand(
+    'mjga.langserver.refactorFile',
+    activeTextEditor.document.uri.fsPath,
+  );
   if (typeof transformedCode === 'string') {
     writeCode(transformedCode);
   }
