@@ -1,5 +1,5 @@
-import * as vscode from 'vscode';
 import * as prettier from 'prettier';
+import * as vscode from 'vscode';
 
 export function readCode(): string {
   const editor = getEditor();
@@ -25,7 +25,7 @@ export function writeCode(code: string): void {
   );
 
   const formattedCode = prettier.format(code, {
-    parser: "java",
+    parser: 'java',
     tabWidth: editor.options.tabSize,
   });
 
