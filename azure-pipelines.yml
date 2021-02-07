@@ -11,9 +11,9 @@ strategy:
     linux:
       imageName: 'ubuntu-16.04'
     mac:
-      imageName: 'macos-10.13'
+      imageName: 'macOS-10.15'
     windows:
-      imageName: 'vs2017-win2016'
+      imageName: 'windows-2019'
 
 pool:
   vmImage: $(imageName)
@@ -31,7 +31,7 @@ steps:
   displayName: Start xvfb
   condition: and(succeeded(), eq(variables['Agent.OS'], 'Linux'))
 
-- bash: yarn install --frozen-lockfile && yarn compile && ls -la out/test && yarn test
+- bash: yarn install --frozen-lockfile && yarn compile && yarn test
   displayName: Run Tests
   env:
     DISPLAY: ':99.0'
