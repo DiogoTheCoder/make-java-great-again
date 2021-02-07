@@ -58,7 +58,7 @@
       "properties": {
           "java.reduce.operators": {
             "type": "array",
-            "markdownDescription": "The operators used by the Language Server to help determine whether or not to refactor to *Reduce*.\n\nSupported:\n\nASSIGN: **=**, PLUS: **+=**, MINUS: **-=**, MULTIPLY: ***=**, DIVIDE: **/=**, REMAINDER: **%=**\n\nBINARY_AND: **&=**, BINARY_OR: **|=**, XOR: **^=**\n\nLEFT_SHIFT: **<<=**, SIGNED_RIGHT_SHIFT: **>>=**, UNSIGNED_RIGHT_SHIFT: **>>>=**\n\n",
+            "markdownDescription": "The operators used by the Language Server to help determine whether or not to refactor to *Reduce*.\n\nSupported:\n\nASSIGN: **=**, PLUS: **+=**, MINUS: **-=**, MULTIPLY: ***=**, DIVIDE: **/=**, REMAINDER: **%=**\n\nBINARY_AND: **&=**, BINARY_OR: **|=**, XOR: **^=**\n\nLEFT_SHIFT: **&lt;&lt;=**, SIGNED_RIGHT_SHIFT: **>>=**, UNSIGNED_RIGHT_SHIFT: **>>>=**\n\n",
             "default": [
               "PLUS",
               "MINUS",
