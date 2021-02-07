@@ -31,7 +31,7 @@ steps:
   displayName: Start xvfb
   condition: and(succeeded(), eq(variables['Agent.OS'], 'Linux'))
 
-- bash: yarn && yarn test
+- bash: yarn install --frozen-lockfile && yarn test
   displayName: Run Tests
   env:
     DISPLAY: ':99.0'
