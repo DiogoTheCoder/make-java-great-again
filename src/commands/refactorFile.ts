@@ -12,10 +12,20 @@ export async function refactorFile(client: LanguageClient): Promise<void> {
     throw Error('No active Java file');
   }
 
+  const refactorConfig = vscode.workspace
+    .getConfiguration('java')
+    .get('refactor') as any;
+
+  let options = {
+    reduce: { operators: refactorConfig.reduce.operators ?? [] },
+  };
+
   let transformedCode = await vscode.commands.executeCommand(
     'mjga.langserver.refactorFile',
     activeTextEditor.document.uri.fsPath,
+    options,
   );
+
   if (typeof transformedCode === 'string') {
     writeCode(transformedCode);
   }

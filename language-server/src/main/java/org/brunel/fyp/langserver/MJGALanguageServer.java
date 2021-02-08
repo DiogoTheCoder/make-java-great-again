@@ -59,7 +59,7 @@ public class MJGALanguageServer implements LanguageServer, LanguageClientAware {
     @Override
     public TextDocumentService getTextDocumentService() {
         // Return the endpoint for language features.
-        return this.textDocumentService;
+        return this.textDocumentService ;
     }
 
     @Override

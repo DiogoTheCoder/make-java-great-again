@@ -1,12 +1,15 @@
 package org.brunel.fyp.langserver.refactorings;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.AssignExpr;
+import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
@@ -37,7 +40,7 @@ public class ForEachRefactoringPattern implements MJGARefactoringPattern {
     private static ExpressionStmt convertToReduce(ForEachStmt forEachStmt, CompilationUnit compilationUnit) {
         ExpressionStmt replacingExpressionStmt = new ExpressionStmt();
 
-        // Should we use reduce? Are we re-assinging and appending?
+        // Should we use reduce? Are we re-assigning and appending?
         Optional<AssignExpr> assignOptional = forEachStmt.findFirst(AssignExpr.class);
         if (!assignOptional.isPresent()) {
             return null;
@@ -61,8 +64,19 @@ public class ForEachRefactoringPattern implements MJGARefactoringPattern {
             return null;
         }
 
+        // Get list of operators from VS Code settings
+        List<Object> operators = MJGAWorkspaceService.options
+                .getJSONObject("reduce")
+                .getJSONArray("operators")
+                .toList();
+
         AssignExpr.Operator assignOperator = assignOptional.get().getOperator();
-        if (!assignOperator.equals(AssignExpr.Operator.PLUS)) {
+        if (!operators.contains(assignOperator.name())) {
+            return null;
+        }
+
+        Optional<BinaryExpr.Operator> assignOperatorBinaryExpr = assignOperator.toBinaryOperator();
+        if (!assignOperatorBinaryExpr.isPresent()) {
             return null;
         }
 
@@ -79,11 +93,11 @@ public class ForEachRefactoringPattern implements MJGARefactoringPattern {
             return null;
         }
 
-        String template = "%s = %s.reduce(%s, (partial, %s) -> partial + %s)";
+        String template = "%s = %s.reduce(%s, (partial, %s) -> partial %s %s)";
         Type arrayType = arrayDeclaratorOptional.get().getType();
         if (arrayType.getClass().equals(ArrayType.class)) {
             // e.g. String[]
-            template = "%s = Arrays.stream(%s).reduce(%s, (partial, %s) -> partial + %s)";
+            template = "%s = Arrays.stream(%s).reduce(%s, (partial, %s) -> partial %s %s)";
             compilationUnit.addImport(java.util.Arrays.class);
         }
 
@@ -93,6 +107,7 @@ public class ForEachRefactoringPattern implements MJGARefactoringPattern {
             arrayVariable.toString(),
             assignDeclaratorOptionalInitializer.get().toString(),
             forEachStmt.getVariableDeclarator().toString(),
+            assignOperatorBinaryExpr.get().asString(),
             assignOptional.get().getValue()
         );
         
