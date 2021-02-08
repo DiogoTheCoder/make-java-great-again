@@ -23,18 +23,25 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.stmt.ForEachStmt;
 import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.printer.PrettyPrinterConfiguration;
+import org.json.JSONObject;
 
 public class MJGAWorkspaceService implements WorkspaceService {
     public static CompilationUnit compilationUnit;
     public static List<VariableDeclarator> variableDeclarationExprs;
+    public static JSONObject options;
 
     @Override
     public CompletableFuture<Object> executeCommand(ExecuteCommandParams params) {
         return CompletableFuture.supplyAsync(() -> {
             if (params.getCommand().equals("mjga.langserver.refactorFile")) {
+                // Get Arguments from VS Code
                 File file = new File(params.getArguments().get(0).toString());
+
+                options = new JSONObject(params.getArguments().get(1).toString());
+
                 String filePath = file.getPath().replaceAll("\"", "");
                 Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).info("Parsing Java code from file: " + filePath);
+
                 try {
                     ParserConfiguration parserConfig = new ParserConfiguration();
                     parserConfig.setIgnoreAnnotationsWhenAttributingComments(true);
@@ -43,13 +50,11 @@ public class MJGAWorkspaceService implements WorkspaceService {
                     compilationUnit = StaticJavaParser.parse(new FileInputStream(filePath));
                     variableDeclarationExprs = compilationUnit.findAll(VariableDeclarator.class);
                     compilationUnit.findAll(ForStmt.class)
-                        .stream()
                         .forEach(forStmt -> {
                             compilationUnit = new ForLoopRefactoringPattern().refactor(forStmt, compilationUnit);
                         });
 
                     compilationUnit.findAll(ForEachStmt.class)
-                        .stream()
                         .forEach(forEachStmt -> {
                             compilationUnit = new ForEachRefactoringPattern().refactor(forEachStmt, compilationUnit);
                         });
