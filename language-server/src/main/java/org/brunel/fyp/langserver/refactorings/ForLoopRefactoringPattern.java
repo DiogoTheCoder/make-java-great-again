@@ -20,7 +20,7 @@ import com.github.javaparser.ast.stmt.Statement;
 
 import org.brunel.fyp.langserver.MJGARefactoringPattern;
 
-public class ForLoopRefactoringPattern implements MJGARefactoringPattern {
+public class gForLoopRefactoringPattern implements MJGARefactoringPattern {
 
     @Override
     public CompilationUnit refactor(Node node, CompilationUnit compilationUnit) {
@@ -122,11 +122,11 @@ public class ForLoopRefactoringPattern implements MJGARefactoringPattern {
             // The startingIndexOptional is not a raw number, is it a variable?
             // check for FieldAccessExpr
             Optional<FieldAccessExpr> startingIndexVariableOptional = initialisationVariableDeclarationExpr
-                .findFirst(FieldAccessExpr.class);
+                    .findFirst(FieldAccessExpr.class);
             if (!startingIndexVariableOptional.isPresent()) {
                 // If its not a variable, it might be a method call instead, like .size()
                 Optional<MethodCallExpr> startingIndexMethodOptional = initialisationVariableDeclarationExpr
-                    .findFirst(MethodCallExpr.class);
+                        .findFirst(MethodCallExpr.class);
                 if (!startingIndexMethodOptional.isPresent()) {
                     return null;
                 } else {
@@ -153,17 +153,17 @@ public class ForLoopRefactoringPattern implements MJGARefactoringPattern {
         if (updateOperator.equals(Operator.POSTFIX_DECREMENT) || updateOperator.equals(Operator.PREFIX_DECREMENT)) {
             // We are likely reversing a for loop
             template = String.format(
-                "IntStream.range(%s + 1, %s + 1).boxed().sorted(Comparator.reverseOrder()).forEach((%s) -> %s )",
-                endIndex,
-                startingIndex,
-                elementVariable,
-                forStmt.getBody().toString()
+                    "IntStream.range(%s + 1, %s + 1).boxed().sorted(Comparator.reverseOrder()).forEach((%s) -> %s )",
+                    endIndex,
+                    startingIndex,
+                    elementVariable,
+                    forStmt.getBody().toString()
             );
 
             compilationUnit.addImport(java.util.Comparator.class);
         } else {
             template = String.format("IntStream.range(%s, %s).forEach((%s) -> %s )", startingIndex, endIndex,
-                elementVariable, forStmt.getBody().toString());
+                    elementVariable, forStmt.getBody().toString());
         }
 
         Expression templateExpression = StaticJavaParser.parseExpression(template);
