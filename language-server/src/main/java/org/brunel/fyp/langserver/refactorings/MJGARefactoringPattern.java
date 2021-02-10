@@ -7,5 +7,5 @@ import java.util.Map;
 
 public interface MJGARefactoringPattern {
     CompilationUnit refactor(Node node, CompilationUnit compilationUnit);
-    Map<String, Boolean> refactorable(Node node, CompilationUnit compilationUnit);
+    Map<RefactorPatternTypes, Boolean> refactorable(Node node, CompilationUnit compilationUnit);
 }

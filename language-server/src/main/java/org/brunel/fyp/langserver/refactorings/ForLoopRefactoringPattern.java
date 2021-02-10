@@ -1,5 +1,6 @@
 package org.brunel.fyp.langserver.refactorings;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -46,8 +47,11 @@ public class ForLoopRefactoringPattern implements MJGARefactoringPattern {
     }
 
     @Override
-    public Map<String, Boolean> refactorable(Node node, CompilationUnit compilationUnit) {
-        return null;
+    public Map<RefactorPatternTypes, Boolean> refactorable(Node node, CompilationUnit compilationUnit) {
+        return new HashMap<RefactorPatternTypes, Boolean>() {{
+            put(RefactorPatternTypes.MAP, canConvertToMap((ForStmt) node));
+            put(RefactorPatternTypes.FOR_EACH, canConvertToForEach((ForStmt) node));
+        }};
     }
 
     private ExpressionStmt convertToMap(ForStmt forStmt, CompilationUnit compilationUnit) {
@@ -121,7 +125,7 @@ public class ForLoopRefactoringPattern implements MJGARefactoringPattern {
     private ExpressionStmt convertToForEach(ForStmt forStmt, CompilationUnit compilationUnit) {
         ExpressionStmt replacingExpressionStmt = new ExpressionStmt();
 
-        if (!canConvertForEach(forStmt)) {
+        if (!canConvertToForEach(forStmt)) {
             return null;
         }
 
@@ -151,7 +155,7 @@ public class ForLoopRefactoringPattern implements MJGARefactoringPattern {
         return replacingExpressionStmt;
     }
 
-    private boolean canConvertForEach(ForStmt forStmt) {
+    private boolean canConvertToForEach(ForStmt forStmt) {
         // Get the starting index
         VariableDeclarationExpr initialisationVariableDeclarationExpr = forStmt.getInitialization().getFirst().get()
                 .asVariableDeclarationExpr();

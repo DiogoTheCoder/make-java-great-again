@@ -1,10 +1,6 @@
 package org.brunel.fyp.langserver;
 
-import org.eclipse.lsp4j.ExecuteCommandOptions;
-import org.eclipse.lsp4j.InitializeParams;
-import org.eclipse.lsp4j.InitializeResult;
-import org.eclipse.lsp4j.ServerCapabilities;
-import org.eclipse.lsp4j.TextDocumentSyncKind;
+import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.LanguageServer;
@@ -79,5 +75,9 @@ public class MJGALanguageServer implements LanguageServer, LanguageClientAware {
     public void connect(LanguageClient languageClient) {
         // Get the client which started this LS.
         this.languageClient = languageClient;
+    }
+
+    public LanguageClient getLanguageClient() {
+        return this.languageClient;
     }
 }

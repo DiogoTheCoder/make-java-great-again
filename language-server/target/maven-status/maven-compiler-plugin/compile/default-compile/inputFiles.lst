@@ -3,4 +3,5 @@
 /Users/diogocosta/Work/computer-science/cs3072/make-java-great-again/language-server/src/main/java/org/brunel/fyp/langserver/MJGATextDocumentService.java
 /Users/diogocosta/Work/computer-science/cs3072/make-java-great-again/language-server/src/main/java/org/brunel/fyp/langserver/MJGALanguageServer.java
 /Users/diogocosta/Work/computer-science/cs3072/make-java-great-again/language-server/src/main/java/org/brunel/fyp/langserver/refactorings/MJGARefactoringPattern.java
+/Users/diogocosta/Work/computer-science/cs3072/make-java-great-again/language-server/src/main/java/org/brunel/fyp/langserver/refactorings/RefactorPatternTypes.java
 /Users/diogocosta/Work/computer-science/cs3072/make-java-great-again/language-server/src/main/java/org/brunel/fyp/langserver/MJGAWorkspaceService.java

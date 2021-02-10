@@ -1,5 +1,6 @@
 package org.brunel.fyp.langserver.refactorings;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -15,6 +16,7 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ForEachStmt;
+import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.Type;
 
@@ -47,8 +49,11 @@ public class ForEachRefactoringPattern implements MJGARefactoringPattern {
     }
 
     @Override
-    public Map<String, Boolean> refactorable(Node node, CompilationUnit compilationUnit) {
-        return null;
+    public Map<RefactorPatternTypes, Boolean> refactorable(Node node, CompilationUnit compilationUnit) {
+        return new HashMap<RefactorPatternTypes, Boolean>() {{
+            put(RefactorPatternTypes.REDUCE, canConvertToReduce((ForEachStmt) node));
+            put(RefactorPatternTypes.FOR_EACH, canConvertToForEach((ForEachStmt) node));
+        }};
     }
 
     private ExpressionStmt convertToReduce(ForEachStmt forEachStmt, CompilationUnit compilationUnit) {
