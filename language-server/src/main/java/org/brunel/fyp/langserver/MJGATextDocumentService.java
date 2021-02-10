@@ -6,6 +6,7 @@ import org.eclipse.lsp4j.services.TextDocumentService;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.logging.Logger;
 
 public class MJGATextDocumentService implements TextDocumentService {
     @Override
@@ -90,7 +91,6 @@ public class MJGATextDocumentService implements TextDocumentService {
 
     @Override
     public void didChange(DidChangeTextDocumentParams didChangeTextDocumentParams) {
-
     }
 
     @Override

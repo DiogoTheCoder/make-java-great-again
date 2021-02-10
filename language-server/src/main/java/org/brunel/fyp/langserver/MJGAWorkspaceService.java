@@ -26,9 +26,10 @@ import com.github.javaparser.printer.PrettyPrinterConfiguration;
 import org.json.JSONObject;
 
 public class MJGAWorkspaceService implements WorkspaceService {
+    private JSONObject configurationSettings;
+
     public static CompilationUnit compilationUnit;
     public static List<VariableDeclarator> variableDeclarationExprs;
-    public static JSONObject options;
 
     @Override
     public CompletableFuture<Object> executeCommand(ExecuteCommandParams params) {
@@ -36,8 +37,6 @@ public class MJGAWorkspaceService implements WorkspaceService {
             if (params.getCommand().equals("mjga.langserver.refactorFile")) {
                 // Get Arguments from VS Code
                 File file = new File(params.getArguments().get(0).toString());
-
-                options = new JSONObject(params.getArguments().get(1).toString());
 
                 String filePath = file.getPath().replaceAll("\"", "");
                 Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).info("Parsing Java code from file: " + filePath);
@@ -78,11 +77,19 @@ public class MJGAWorkspaceService implements WorkspaceService {
 
     @Override
     public void didChangeConfiguration(DidChangeConfigurationParams didChangeConfigurationParams) {
+        this.configurationSettings = new JSONObject(didChangeConfigurationParams.getSettings().toString())
+                .getJSONObject("java");
+
+        Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).info( this.configurationSettings.toString());
 
     }
 
     @Override
     public void didChangeWatchedFiles(DidChangeWatchedFilesParams didChangeWatchedFilesParams) {
 
+    }
+
+    public JSONObject getConfigurationSettings() {
+        return this.configurationSettings;
     }
 }

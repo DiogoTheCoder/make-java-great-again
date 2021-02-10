@@ -8,25 +8,32 @@ import org.eclipse.lsp4j.TextDocumentSyncKind;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.LanguageServer;
-import org.eclipse.lsp4j.services.TextDocumentService;
-import org.eclipse.lsp4j.services.WorkspaceService;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
 
 public class MJGALanguageServer implements LanguageServer, LanguageClientAware {
-    public static LanguageClient CLIENT;
+    private static MJGALanguageServer INSTANCE;
 
-    private TextDocumentService textDocumentService;
-    private WorkspaceService workspaceService;
+    private LanguageClient languageClient;
+    private MJGATextDocumentService textDocumentService;
+    private MJGAWorkspaceService workspaceService;
     private int errorCode = 1;
 
-    public MJGALanguageServer() {
+    private MJGALanguageServer() {
         Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).info("Instantiating " + this.getClass().getSimpleName() + "...");
         this.textDocumentService = new MJGATextDocumentService();
         this.workspaceService = new MJGAWorkspaceService();
+    }
+
+    public static MJGALanguageServer getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new MJGALanguageServer();
+        }
+
+        return INSTANCE;
     }
 
     @Override
@@ -37,7 +44,7 @@ public class MJGALanguageServer implements LanguageServer, LanguageClientAware {
         // Set the capabilities of the LS to inform the client.
         initializeResult.getCapabilities().setTextDocumentSync(TextDocumentSyncKind.Full);
 
-        List<String> commands = Arrays.asList("mjga.langserver.refactorFile");
+        List<String> commands = Collections.singletonList("mjga.langserver.refactorFile");
         ExecuteCommandOptions executeCommandOptions = new ExecuteCommandOptions(commands);
         initializeResult.getCapabilities().setExecuteCommandProvider(executeCommandOptions);
         return CompletableFuture.supplyAsync(()->initializeResult);
@@ -57,13 +64,13 @@ public class MJGALanguageServer implements LanguageServer, LanguageClientAware {
     }
 
     @Override
-    public TextDocumentService getTextDocumentService() {
+    public MJGATextDocumentService getTextDocumentService() {
         // Return the endpoint for language features.
         return this.textDocumentService ;
     }
 
     @Override
-    public WorkspaceService getWorkspaceService() {
+    public MJGAWorkspaceService getWorkspaceService() {
         // Return the endpoint for workspace functionality.
         return this.workspaceService;
     }
@@ -71,6 +78,6 @@ public class MJGALanguageServer implements LanguageServer, LanguageClientAware {
     @Override
     public void connect(LanguageClient languageClient) {
         // Get the client which started this LS.
-        CLIENT = languageClient;
+        this.languageClient = languageClient;
     }
 }
