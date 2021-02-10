@@ -17,8 +17,9 @@ import com.github.javaparser.ast.stmt.ForEachStmt;
 import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.Type;
 
+import org.brunel.fyp.langserver.MJGALanguageServer;
 import org.brunel.fyp.langserver.MJGARefactoringPattern;
-import org.brunel.fyp.langserver.MJGAWorkspaceService;
+import org.json.JSONObject;
 
 public class ForEachRefactoringPattern implements MJGARefactoringPattern {
 
@@ -47,7 +48,7 @@ public class ForEachRefactoringPattern implements MJGARefactoringPattern {
         }
 
         NameExpr assignExpression = assignOptional.get().getTarget().asNameExpr();
-        Optional<VariableDeclarator> assignDeclaratorOptional = MJGAWorkspaceService.variableDeclarationExprs
+        Optional<VariableDeclarator> assignDeclaratorOptional = MJGALanguageServer.getInstance().getTextDocumentService().getVariableDeclarationExprs()
             .stream()
             .filter(variable -> variable.getName().getIdentifier()
             .equals(assignExpression.getName().getIdentifier()))
@@ -65,7 +66,10 @@ public class ForEachRefactoringPattern implements MJGARefactoringPattern {
         }
 
         // Get list of operators from VS Code settings
-        List<Object> operators = MJGAWorkspaceService.options
+        JSONObject configurationSettings = MJGALanguageServer.getInstance().getWorkspaceService().getConfigurationSettings();
+        Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).info(configurationSettings.toString());
+        List<Object> operators = configurationSettings
+                .getJSONObject("refactor")
                 .getJSONObject("reduce")
                 .getJSONArray("operators")
                 .toList();
@@ -82,7 +86,7 @@ public class ForEachRefactoringPattern implements MJGARefactoringPattern {
 
         // Workout which type of Array/List is this
         NameExpr arrayVariable = forEachStmt.getIterable().asNameExpr();
-        Optional<VariableDeclarator> arrayDeclaratorOptional = MJGAWorkspaceService.variableDeclarationExprs
+        Optional<VariableDeclarator> arrayDeclaratorOptional = MJGALanguageServer.getInstance().getTextDocumentService().getVariableDeclarationExprs()
             .stream()
             .filter(variable -> variable.getName().getIdentifier()
             .equals(arrayVariable.getName().getIdentifier()))
@@ -122,7 +126,7 @@ public class ForEachRefactoringPattern implements MJGARefactoringPattern {
 
         // Workout which type of Array/List is this
         NameExpr arrayVariable = forEachStmt.getIterable().asNameExpr();
-        Optional<VariableDeclarator> arrayDeclaratorOptional = MJGAWorkspaceService.variableDeclarationExprs
+        Optional<VariableDeclarator> arrayDeclaratorOptional = MJGALanguageServer.getInstance().getTextDocumentService().getVariableDeclarationExprs()
             .stream()
             .filter(variable -> variable.getName().getIdentifier()
             .equals(arrayVariable.getName().getIdentifier()))

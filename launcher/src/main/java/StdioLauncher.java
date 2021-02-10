@@ -28,7 +28,7 @@ public class StdioLauncher {
      */
     private static void startServer(InputStream in, OutputStream out) throws ExecutionException, InterruptedException {
         // Initialize the MJGALanguageServer
-        MJGALanguageServer languageServer = new MJGALanguageServer();
+        MJGALanguageServer languageServer = MJGALanguageServer.getInstance();
         // Create JSON RPC launcher for HelloLanguageServer instance.
         Launcher<LanguageClient> launcher = LSPLauncher.createServerLauncher(languageServer, in, out);
 
