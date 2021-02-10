@@ -1,6 +1,8 @@
 package org.brunel.fyp.langserver.refactorings;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
 
@@ -14,14 +16,22 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ForEachStmt;
+import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.Type;
 
 import org.brunel.fyp.langserver.MJGALanguageServer;
-import org.brunel.fyp.langserver.MJGARefactoringPattern;
 import org.json.JSONObject;
 
 public class ForEachRefactoringPattern implements MJGARefactoringPattern {
+    // Shared Variables
+    NameExpr arrayVariable;
+    VariableDeclarator arrayDeclarator;
+
+    // Reduce Variables
+    AssignExpr assignExpr;
+    Expression assignDeclaratorInitializer;
+    BinaryExpr.Operator assignBinaryExpressionOperator;
 
     @Override
     public CompilationUnit refactor(Node node, CompilationUnit compilationUnit) {
@@ -38,32 +48,74 @@ public class ForEachRefactoringPattern implements MJGARefactoringPattern {
         return compilationUnit;
     }
 
-    private static ExpressionStmt convertToReduce(ForEachStmt forEachStmt, CompilationUnit compilationUnit) {
+    @Override
+    public Map<RefactorPatternTypes, Boolean> refactorable(Node node, CompilationUnit compilationUnit) {
+        return new HashMap<RefactorPatternTypes, Boolean>() {{
+            put(RefactorPatternTypes.REDUCE, canConvertToReduce((ForEachStmt) node));
+            put(RefactorPatternTypes.FOR_EACH, canConvertToForEach((ForEachStmt) node));
+        }};
+    }
+
+    private ExpressionStmt convertToReduce(ForEachStmt forEachStmt, CompilationUnit compilationUnit) {
         ExpressionStmt replacingExpressionStmt = new ExpressionStmt();
 
-        // Should we use reduce? Are we re-assigning and appending?
-        Optional<AssignExpr> assignOptional = forEachStmt.findFirst(AssignExpr.class);
-        if (!assignOptional.isPresent()) {
+        if (!canConvertToReduce(forEachStmt)) {
             return null;
         }
 
-        NameExpr assignExpression = assignOptional.get().getTarget().asNameExpr();
+
+        String template = "%s = %s.reduce(%s, (partial, %s) -> partial %s %s)";
+        Type arrayType = this.arrayDeclarator.getType();
+        if (arrayType.getClass().equals(ArrayType.class)) {
+            // e.g. String[]
+            template = "%s = Arrays.stream(%s).reduce(%s, (partial, %s) -> partial %s %s)";
+            compilationUnit.addImport(java.util.Arrays.class);
+        }
+
+        template = String.format(
+                template,
+                this.assignExpr.getTarget().toString(),
+                this.arrayVariable.toString(),
+                this.assignDeclaratorInitializer.toString(),
+                forEachStmt.getVariableDeclarator().toString(),
+                assignBinaryExpressionOperator.asString(),
+                this.assignExpr.getValue()
+        );
+        
+        Expression templateExpression = StaticJavaParser.parseExpression(template);
+        replacingExpressionStmt.setExpression(templateExpression);
+
+        return replacingExpressionStmt;
+    }
+
+    private boolean canConvertToReduce(ForEachStmt forEachStmt) {
+        // Should we use reduce? Are we re-assigning and appending?
+        Optional<AssignExpr> assignOptional = forEachStmt.findFirst(AssignExpr.class);
+        if (!assignOptional.isPresent()) {
+            return false;
+        }
+
+        this.assignExpr = assignOptional.get();
+
+        NameExpr assignExpression = this.assignExpr.getTarget().asNameExpr();
         Optional<VariableDeclarator> assignDeclaratorOptional = MJGALanguageServer.getInstance().getTextDocumentService().getVariableDeclarationExprs()
-            .stream()
-            .filter(variable -> variable.getName().getIdentifier()
-            .equals(assignExpression.getName().getIdentifier()))
-            .findFirst();
+                .stream()
+                .filter(variable -> variable.getName().getIdentifier()
+                        .equals(assignExpression.getName().getIdentifier()))
+                .findFirst();
 
         if (!assignDeclaratorOptional.isPresent()) {
             // Cannot find the result variable declaration!?
-            return null;
+            return false;
         }
 
         Optional<Expression> assignDeclaratorOptionalInitializer = assignDeclaratorOptional.get().getInitializer();
         if (!assignDeclaratorOptionalInitializer.isPresent()) {
             // Result variable wasn't been initialised, hmmm...
-            return null;
+            return false;
         }
+
+        this.assignDeclaratorInitializer = assignDeclaratorOptionalInitializer.get();
 
         // Get list of operators from VS Code settings
         JSONObject configurationSettings = MJGALanguageServer.getInstance().getWorkspaceService().getConfigurationSettings();
@@ -76,80 +128,82 @@ public class ForEachRefactoringPattern implements MJGARefactoringPattern {
 
         AssignExpr.Operator assignOperator = assignOptional.get().getOperator();
         if (!operators.contains(assignOperator.name())) {
-            return null;
+            return false;
         }
 
         Optional<BinaryExpr.Operator> assignOperatorBinaryExpr = assignOperator.toBinaryOperator();
         if (!assignOperatorBinaryExpr.isPresent()) {
-            return null;
+            return false;
         }
 
+        this.assignBinaryExpressionOperator = assignOperatorBinaryExpr.get();
+
         // Workout which type of Array/List is this
-        NameExpr arrayVariable = forEachStmt.getIterable().asNameExpr();
+        this.arrayVariable = forEachStmt.getIterable().asNameExpr();
         Optional<VariableDeclarator> arrayDeclaratorOptional = MJGALanguageServer.getInstance().getTextDocumentService().getVariableDeclarationExprs()
-            .stream()
-            .filter(variable -> variable.getName().getIdentifier()
-            .equals(arrayVariable.getName().getIdentifier()))
-            .findFirst();
+                .stream()
+                .filter(variable -> variable.getName().getIdentifier()
+                        .equals(this.arrayVariable.getName().getIdentifier()))
+                .findFirst();
 
         if (!arrayDeclaratorOptional.isPresent()) {
             // Array not declared, wtf o_o
-            return null;
+            return false;
         }
 
-        String template = "%s = %s.reduce(%s, (partial, %s) -> partial %s %s)";
-        Type arrayType = arrayDeclaratorOptional.get().getType();
-        if (arrayType.getClass().equals(ArrayType.class)) {
-            // e.g. String[]
-            template = "%s = Arrays.stream(%s).reduce(%s, (partial, %s) -> partial %s %s)";
-            compilationUnit.addImport(java.util.Arrays.class);
-        }
+        this.arrayDeclarator = arrayDeclaratorOptional.get();
 
-        template = String.format(
-            template,
-            assignOptional.get().getTarget().toString(),
-            arrayVariable.toString(),
-            assignDeclaratorOptionalInitializer.get().toString(),
-            forEachStmt.getVariableDeclarator().toString(),
-            assignOperatorBinaryExpr.get().asString(),
-            assignOptional.get().getValue()
-        );
-        
-        Expression templateExpression = StaticJavaParser.parseExpression(template);
-        replacingExpressionStmt.setExpression(templateExpression);
-
-        return replacingExpressionStmt;
+        return true;
     }
 
-    private static ExpressionStmt convertToForEach(ForEachStmt forEachStmt, CompilationUnit compilationUnit) {
+    private ExpressionStmt convertToForEach(ForEachStmt forEachStmt, CompilationUnit compilationUnit) {
         ExpressionStmt replacingExpressionStmt = new ExpressionStmt();
 
-        // Workout which type of Array/List is this
-        NameExpr arrayVariable = forEachStmt.getIterable().asNameExpr();
-        Optional<VariableDeclarator> arrayDeclaratorOptional = MJGALanguageServer.getInstance().getTextDocumentService().getVariableDeclarationExprs()
-            .stream()
-            .filter(variable -> variable.getName().getIdentifier()
-            .equals(arrayVariable.getName().getIdentifier()))
-            .findFirst();
-
-        if (!arrayDeclaratorOptional.isPresent()) {
-            // Array not declared, wtf o_o
+        if (!canConvertToForEach(forEachStmt)) {
             return null;
         }
 
         String template = "%s.forEach(%s -> %s)";
-        Type arrayType = arrayDeclaratorOptional.get().getType();
+        Type arrayType = this.arrayDeclarator.getType();
         if (arrayType.getClass().equals(ArrayType.class)) {
             // e.g. String[]
             template = "Arrays.stream(%s).forEach(%s -> %s)";
             compilationUnit.addImport(java.util.Arrays.class);
         }
 
-        template = String.format(template, arrayVariable.toString(), forEachStmt.getVariableDeclarator().toString(), forEachStmt.getBody().toString());
+        template = String.format(
+                template,
+                this.arrayVariable.toString(),
+                forEachStmt.getVariableDeclarator().toString(),
+                forEachStmt.getBody().toString()
+        );
+
         Expression templateExpression = StaticJavaParser.parseExpression(template);
         replacingExpressionStmt.setExpression(templateExpression);
 
         return replacingExpressionStmt;
+    }
+
+    private boolean canConvertToForEach(ForEachStmt forEachStmt) {
+        // Workout which type of Array/List is this
+        this.arrayVariable = forEachStmt.getIterable().asNameExpr();
+        Optional<VariableDeclarator> arrayDeclaratorOptional = MJGALanguageServer
+                .getInstance()
+                .getTextDocumentService()
+                .getVariableDeclarationExprs()
+                .stream()
+                .filter(variable -> variable.getName().getIdentifier()
+                        .equals(this.arrayVariable.getName().getIdentifier()))
+                .findFirst();
+
+        if (!arrayDeclaratorOptional.isPresent()) {
+            // Array not declared, wtf o_o
+            return false;
+        }
+
+        this.arrayDeclarator = arrayDeclaratorOptional.get();
+
+        return true;
     }
     
 }
