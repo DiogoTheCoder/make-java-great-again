@@ -1,6 +1,7 @@
 package org.brunel.fyp.langserver.refactorings;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
 
@@ -18,7 +19,6 @@ import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.Type;
 
 import org.brunel.fyp.langserver.MJGALanguageServer;
-import org.brunel.fyp.langserver.MJGARefactoringPattern;
 import org.json.JSONObject;
 
 public class ForEachRefactoringPattern implements MJGARefactoringPattern {
@@ -36,6 +36,11 @@ public class ForEachRefactoringPattern implements MJGARefactoringPattern {
         }
 
         return compilationUnit;
+    }
+
+    @Override
+    public Map<String, Boolean> refactorable(Node node, CompilationUnit compilationUnit) {
+        return null;
     }
 
     private static ExpressionStmt convertToReduce(ForEachStmt forEachStmt, CompilationUnit compilationUnit) {

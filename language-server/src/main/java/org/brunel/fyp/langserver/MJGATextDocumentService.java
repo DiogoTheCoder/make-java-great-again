@@ -36,41 +36,58 @@ import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.TextDocumentService;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class MJGATextDocumentService implements TextDocumentService {
-    private CompilationUnit compilationUnit;
     private List<VariableDeclarator> variableDeclarationExprs;
 
-    public String parseFile(String filePath) {
-        try {
-            ParserConfiguration parserConfig = new ParserConfiguration();
-            parserConfig.setIgnoreAnnotationsWhenAttributingComments(true);
-            parserConfig.setDoNotAssignCommentsPrecedingEmptyLines(true);
-            StaticJavaParser.setConfiguration(parserConfig);
-            compilationUnit = StaticJavaParser.parse(new FileInputStream(filePath));
-            variableDeclarationExprs = compilationUnit.findAll(VariableDeclarator.class);
-            compilationUnit.findAll(ForStmt.class)
-                    .forEach(forStmt -> {
-                        compilationUnit = new ForLoopRefactoringPattern().refactor(forStmt, compilationUnit);
-                    });
+    public MJGATextDocumentService() {
+        ParserConfiguration parserConfiguration = new ParserConfiguration();
+        parserConfiguration.setIgnoreAnnotationsWhenAttributingComments(true);
+        parserConfiguration.setDoNotAssignCommentsPrecedingEmptyLines(true);
 
-            compilationUnit.findAll(ForEachStmt.class)
-                    .forEach(forEachStmt -> {
-                        compilationUnit = new ForEachRefactoringPattern().refactor(forEachStmt, compilationUnit);
-                    });
+        StaticJavaParser.setConfiguration(parserConfiguration);
+    }
 
-            return compilationUnit.toString(new PrettyPrinterConfiguration().setOrderImports(true));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return e.toString();
+    public CompilationUnit parseFile(String filePath) throws FileNotFoundException {
+        Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).info("Parsing Java code from file: " + filePath);
+
+        CompilationUnit compilationUnit = StaticJavaParser.parse(new FileInputStream(filePath));
+        variableDeclarationExprs = compilationUnit.findAll(VariableDeclarator.class);
+
+        return compilationUnit;
+    }
+
+    public String refactor(CompilationUnit compilationUnit) {
+        for (ForStmt forStmt : compilationUnit.findAll(ForStmt.class)) {
+            compilationUnit = new ForLoopRefactoringPattern().refactor(forStmt, compilationUnit);
         }
+
+        for (ForEachStmt forEachStmt : compilationUnit.findAll(ForEachStmt.class)) {
+            compilationUnit = new ForEachRefactoringPattern().refactor(forEachStmt, compilationUnit);
+        }
+
+        return compilationUnit.toString(new PrettyPrinterConfiguration().setOrderImports(true));
+    }
+
+    public JSONObject getRefactorableCode(CompilationUnit compilationUnit) {
+        for (ForStmt forStmt : compilationUnit.findAll(ForStmt.class)) {
+//            compilationUnit = new ForLoopRefactoringPattern().refactorable(forStmt, compilationUnit);
+        }
+
+        for (ForEachStmt forEachStmt : compilationUnit.findAll(ForEachStmt.class)) {
+//            compilationUnit = new ForEachRefactoringPattern().refactor(forEachStmt, compilationUnit);
+        }
+
+        return null;
     }
 
     public List<VariableDeclarator> getVariableDeclarationExprs() {
@@ -160,7 +177,12 @@ public class MJGATextDocumentService implements TextDocumentService {
         File file = new File(didChangeTextDocumentParams.getTextDocument().getUri());
 
         String filePath = file.getPath().replaceAll("\"", "");
-        Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).info("Parsing Java code from file: " + filePath);
+        try {
+            CompilationUnit compilationUnit = this.parseFile(filePath);
+            this.getRefactorableCode(compilationUnit);
+        } catch (Exception e) {
+            Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.SEVERE, e.getMessage());
+        }
     }
 
     @Override

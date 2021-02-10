@@ -1,5 +1,6 @@
 package org.brunel.fyp.langserver.refactorings;
 
+import java.util.Map;
 import java.util.Optional;
 
 import com.github.javaparser.StaticJavaParser;
@@ -18,9 +19,16 @@ import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.ast.stmt.Statement;
 
-import org.brunel.fyp.langserver.MJGARefactoringPattern;
-
 public class ForLoopRefactoringPattern implements MJGARefactoringPattern {
+    // Map Variables
+    private MethodCallExpr expressionStmtMethodCall;
+    private NameExpr arrayName;
+
+    // forEach Variables
+    Expression updateExpr;
+    String elementVariable;
+    String startingIndex;
+    String endingIndex;
 
     @Override
     public CompilationUnit refactor(Node node, CompilationUnit compilationUnit) {
@@ -37,68 +45,113 @@ public class ForLoopRefactoringPattern implements MJGARefactoringPattern {
         return compilationUnit;
     }
 
-    private static ExpressionStmt convertToMap(ForStmt forStmt, CompilationUnit compilationUnit) {
+    @Override
+    public Map<String, Boolean> refactorable(Node node, CompilationUnit compilationUnit) {
+        return null;
+    }
+
+    private ExpressionStmt convertToMap(ForStmt forStmt, CompilationUnit compilationUnit) {
         ExpressionStmt replacingExpressionStmt = new ExpressionStmt();
 
+        if (!canConvertToMap(forStmt)) {
+            return null;
+        }
+
+        String mapFunction = "";
+
+        // Build something like this: "array =
+        // array.stream().map(String::toUpperCase).collect(Collectors.toList())"
+        if (expressionStmtMethodCall.toString().contains(".toUpperCase()")) {
+            // We are trying to uppercase the elements of the list
+            mapFunction = "String::toUpperCase";
+        } else if (expressionStmtMethodCall.toString().contains(".toLowerCase()")) {
+            // We are trying to lowercase the elements of the list
+            mapFunction = "String::toLowerCase";
+        }
+
+        String template = String.format("%s = %s.stream().map(%s).collect(Collectors.toList())",
+                this.arrayName.toString(), this.arrayName.toString(), mapFunction);
+
+        Expression templateExpression = StaticJavaParser.parseExpression(template);
+        replacingExpressionStmt.setExpression(templateExpression);
+
+        compilationUnit.addImport(java.util.stream.Collectors.class);
+
+        return replacingExpressionStmt;
+    }
+
+    private boolean canConvertToMap(ForStmt forStmt) {
         // Are we looping the entire array?
         Optional<MethodCallExpr> arraySizeCallOptional = forStmt.findFirst(MethodCallExpr.class);
         if (!arraySizeCallOptional.isPresent()) {
             // Not a list, could be an array instead
-            return null;
+            return false;
         }
 
         MethodCallExpr arraySizeCall = arraySizeCallOptional.get().asMethodCallExpr();
         if (!arraySizeCall.getName().toString().equals("size")) {
             // Not looping through the entire array
-            return null;
+            return false;
         }
 
         Optional<NameExpr> arrayNameOptional = arraySizeCall.findFirst(NameExpr.class);
         if (!arrayNameOptional.isPresent()) {
-            return null;
+            return false;
         }
+
+        this.arrayName = arrayNameOptional.get();
 
         NodeList<Statement> bodyExpression = forStmt.getBody().asBlockStmt().getStatements();
         if (bodyExpression.size() == 1 && bodyExpression.get(0).isExpressionStmt()) {
             Optional<Node> expressionStmtMethodCallOptional = bodyExpression.get(0).getChildNodes().stream()
                     .filter(expression -> expression.getClass().equals(MethodCallExpr.class)).findFirst();
             if (!expressionStmtMethodCallOptional.isPresent()) {
-                return null;
+                return false;
             }
 
-            MethodCallExpr expressionStmtMethodCall = (MethodCallExpr) expressionStmtMethodCallOptional.get();
-            if (!expressionStmtMethodCall.getName().toString().equals("set")) {
-                // We ain't trying to set anything, don't use map therefore
-                return null;
-            }
+            this.expressionStmtMethodCall = (MethodCallExpr) expressionStmtMethodCallOptional.get();
 
-            String mapFunction = "";
-
-            // Build something like this: "array =
-            // array.stream().map(String::toUpperCase).collect(Collectors.toList())"
-            if (expressionStmtMethodCall.toString().contains(".toUpperCase()")) {
-                // We are trying to uppercase the elements of the list
-                mapFunction = "String::toUpperCase";
-            } else if (expressionStmtMethodCall.toString().contains(".toLowerCase()")) {
-                // We are trying to lowercase the elements of the list
-                mapFunction = "String::toLowerCase";
-            }
-
-            String template = String.format("%s = %s.stream().map(%s).collect(Collectors.toList())",
-                    arrayNameOptional.get().toString(), arrayNameOptional.get().toString(), mapFunction);
-
-            Expression templateExpression = StaticJavaParser.parseExpression(template);
-            replacingExpressionStmt.setExpression(templateExpression);
-
-            compilationUnit.addImport(java.util.stream.Collectors.class);
+            // We ain't trying to set anything, don't use map therefore
+            return this.expressionStmtMethodCall.getName().toString().equals("set");
         }
+
+        return false;
+    }
+
+    private ExpressionStmt convertToForEach(ForStmt forStmt, CompilationUnit compilationUnit) {
+        ExpressionStmt replacingExpressionStmt = new ExpressionStmt();
+
+        if (!canConvertForEach(forStmt)) {
+            return null;
+        }
+
+        Operator updateOperator = this.updateExpr.asUnaryExpr().getOperator();
+        String template = "";
+        if (updateOperator.equals(Operator.POSTFIX_DECREMENT) || updateOperator.equals(Operator.PREFIX_DECREMENT)) {
+            // We are likely reversing a for loop
+            template = String.format(
+                    "IntStream.range(%s + 1, %s + 1).boxed().sorted(Comparator.reverseOrder()).forEach((%s) -> %s )",
+                    this.endingIndex,
+                    this.startingIndex,
+                    this.elementVariable,
+                    forStmt.getBody().toString()
+            );
+
+            compilationUnit.addImport(java.util.Comparator.class);
+        } else {
+            template = String.format("IntStream.range(%s, %s).forEach((%s) -> %s )", this.startingIndex, this.endingIndex,
+                    this.elementVariable, forStmt.getBody().toString());
+        }
+
+        Expression templateExpression = StaticJavaParser.parseExpression(template);
+        replacingExpressionStmt.setExpression(templateExpression);
+
+        compilationUnit.addImport(java.util.stream.IntStream.class);
 
         return replacingExpressionStmt;
     }
 
-    private static ExpressionStmt convertToForEach(ForStmt forStmt, CompilationUnit compilationUnit) {
-        ExpressionStmt replacingExpressionStmt = new ExpressionStmt();
-
+    private boolean canConvertForEach(ForStmt forStmt) {
         // Get the starting index
         VariableDeclarationExpr initialisationVariableDeclarationExpr = forStmt.getInitialization().getFirst().get()
                 .asVariableDeclarationExpr();
@@ -106,14 +159,16 @@ public class ForLoopRefactoringPattern implements MJGARefactoringPattern {
                 .findFirst(VariableDeclarator.class);
         if (!variableDeclarator.isPresent()) {
             // Something is wrong, abandon!
-            return null;
+            return false;
         }
 
         // "int i = 0;", get me the 1st element, i.e. the variable name
         String elementVariable = variableDeclarator.get().getChildNodes().get(1).toString();
         if (elementVariable == null || elementVariable.isEmpty()) {
-            return null;
+            return false;
         }
+
+        this.elementVariable = elementVariable;
 
         String startingIndex;
         Optional<IntegerLiteralExpr> startingIndexOptional = initialisationVariableDeclarationExpr
@@ -128,7 +183,7 @@ public class ForLoopRefactoringPattern implements MJGARefactoringPattern {
                 Optional<MethodCallExpr> startingIndexMethodOptional = initialisationVariableDeclarationExpr
                         .findFirst(MethodCallExpr.class);
                 if (!startingIndexMethodOptional.isPresent()) {
-                    return null;
+                    return false;
                 } else {
                     startingIndex = startingIndexMethodOptional.get().toString();
                 }
@@ -139,39 +194,26 @@ public class ForLoopRefactoringPattern implements MJGARefactoringPattern {
             startingIndex = startingIndexOptional.get().getValue();
         }
 
+        this.startingIndex = startingIndex;
+
+        Optional<Expression> compareOptional = forStmt.getCompare();
+        if (!compareOptional.isPresent()) {
+            return false;
+        }
+
         // Right side of the comparsion usually has the end index
-        String endIndex = forStmt.getCompare().get().asBinaryExpr().getRight().toString();
+        this.endingIndex = compareOptional.get().asBinaryExpr().getRight().toString();
 
         Optional<Expression> updateOptional = forStmt.getUpdate().getFirst();
+        // Has no update, e.g. i++ or i--, wtf :/
         if (!updateOptional.isPresent()) {
-            // Has no update, e.g. i++ or i--, wtf :/
-            return null;
+            return false;
         }
 
-        Operator updateOperator = updateOptional.get().asUnaryExpr().getOperator();
-        String template = "";
-        if (updateOperator.equals(Operator.POSTFIX_DECREMENT) || updateOperator.equals(Operator.PREFIX_DECREMENT)) {
-            // We are likely reversing a for loop
-            template = String.format(
-                    "IntStream.range(%s + 1, %s + 1).boxed().sorted(Comparator.reverseOrder()).forEach((%s) -> %s )",
-                    endIndex,
-                    startingIndex,
-                    elementVariable,
-                    forStmt.getBody().toString()
-            );
+        this.updateExpr = updateOptional.get();
 
-            compilationUnit.addImport(java.util.Comparator.class);
-        } else {
-            template = String.format("IntStream.range(%s, %s).forEach((%s) -> %s )", startingIndex, endIndex,
-                    elementVariable, forStmt.getBody().toString());
-        }
-
-        Expression templateExpression = StaticJavaParser.parseExpression(template);
-        replacingExpressionStmt.setExpression(templateExpression);
-
-        compilationUnit.addImport(java.util.stream.IntStream.class);
-
-        return replacingExpressionStmt;
+        return true;
     }
+
 
 }

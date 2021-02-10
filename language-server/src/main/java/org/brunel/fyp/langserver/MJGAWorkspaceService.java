@@ -1,5 +1,6 @@
 package org.brunel.fyp.langserver;
 
+import com.github.javaparser.ast.CompilationUnit;
 import org.eclipse.lsp4j.DidChangeConfigurationParams;
 import org.eclipse.lsp4j.DidChangeWatchedFilesParams;
 import org.eclipse.lsp4j.ExecuteCommandParams;
@@ -9,6 +10,7 @@ import org.eclipse.lsp4j.services.WorkspaceService;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
@@ -26,7 +28,14 @@ public class MJGAWorkspaceService implements WorkspaceService {
                 String filePath = file.getPath().replaceAll("\"", "");
                 Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).info("Parsing Java code from file: " + filePath);
 
-                return MJGALanguageServer.getInstance().getTextDocumentService().parseFile(filePath);
+                try {
+                    MJGATextDocumentService mjgaTextDocumentService = MJGALanguageServer.getInstance().getTextDocumentService();
+                    CompilationUnit compilationUnit = mjgaTextDocumentService.parseFile(filePath);
+                    return mjgaTextDocumentService.refactor(compilationUnit);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                    return e.toString();
+                }
             }
 
             throw new UnsupportedOperationException();
