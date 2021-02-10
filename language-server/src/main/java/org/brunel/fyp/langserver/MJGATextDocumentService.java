@@ -61,94 +61,51 @@ public class MJGATextDocumentService implements TextDocumentService {
         for (ForStmt forStmt : compilationUnit.findAll(ForStmt.class)) {
             Map<RefactorPatternTypes, Boolean> refactorPatternTypes = new ForLoopRefactoringPattern().refactorable(forStmt, compilationUnit);
             if (!refactorPatternTypes.isEmpty()) {
-                if (forStmt.getRange().isPresent()) {
-                    refactorPatternTypes
-                            .entrySet()
-                            .stream()
-                            .filter(Entry::getValue)
-                            .map(Entry::getKey)
-                            .findFirst()
-                            .ifPresent(refactorPattern -> {
-                                com.github.javaparser.Range javaRange = forStmt.getRange().get();
-                                Range lspRange = new Range(
-                                        new Position(javaRange.begin.line - 1, javaRange.begin.column - 1),
-                                        new Position(javaRange.end.line - 1, javaRange.end.column - 1)
-                                );
-
-                                diagnostics.add(new Diagnostic(
-                                        lspRange,
-                                        "Can refactor this into a " + RefactorPatternTypes.getValue(refactorPattern),
-                                        DiagnosticSeverity.Information,
-                                        "Make Java Great Again"
-                                ));
-                            });
-                }
+                diagnostics.addAll(this.getDiagnostics(forStmt, refactorPatternTypes));
             }
         }
 
         for (ForEachStmt forEachStmt : compilationUnit.findAll(ForEachStmt.class)) {
             Map<RefactorPatternTypes, Boolean> refactorPatternTypes = new ForEachRefactoringPattern().refactorable(forEachStmt, compilationUnit);
             if (!refactorPatternTypes.isEmpty()) {
-                if (forEachStmt.getRange().isPresent()) {
-                    refactorPatternTypes
-                            .entrySet()
-                            .stream()
-                            .filter(Entry::getValue)
-                            .map(Entry::getKey)
-                            .findFirst()
-                            .ifPresent(refactorPattern -> {
-                                com.github.javaparser.Range javaRange = forEachStmt.getRange().get();
-                                Range lspRange = new Range(
-                                        new Position(javaRange.begin.line - 1, javaRange.begin.column - 1),
-                                        new Position(javaRange.end.line - 1, javaRange.end.column - 1)
-                                );
-
-                                diagnostics.add(new Diagnostic(
-                                        lspRange,
-                                        "Can refactor this into a " + RefactorPatternTypes.getValue(refactorPattern),
-                                        DiagnosticSeverity.Information,
-                                        "Make Java Great Again"
-                                ));
-                            });
-                }
+                diagnostics.addAll(this.getDiagnostics(forEachStmt, refactorPatternTypes));
             }
         }
 
-        Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).info(diagnostics.toString());
         if (!diagnostics.isEmpty()) {
             MJGALanguageServer.getInstance().getLanguageClient()
                     .publishDiagnostics(new PublishDiagnosticsParams(filePath, diagnostics));
         }
     }
 
-//    private List<Diagnostic> getDiagnostics(Node node, Map<RefactorPatternTypes, Boolean> refactorPatternTypes) {
-//        List<Diagnostic> diagnostics = new ArrayList<>();
-//        if (node.getRange().isPresent()) {
-//            refactorPatternTypes
-//                    .entrySet()
-//                    .stream()
-//                    .filter(Entry::getValue)
-//                    .map(Entry::getKey)
-//                    .findFirst()
-//                    .ifPresent(refactorPattern -> {
-//                        com.github.javaparser.Range javaRange = node.getRange().get();
-//                        Range lspRange = new Range(
-//                                new Position(javaRange.begin.line - 1, javaRange.begin.column - 1),
-//                                new Position(javaRange.end.line - 1, javaRange.end.column - 1)
-//                        );
-//
-//                        diagnostics.add(new Diagnostic(
-//                                lspRange,
-//                                "Can refactor this into a " + RefactorPatternTypes.getValue(refactorPattern),
-//                                DiagnosticSeverity.Information,
-//                                "Make Java Great Again"
-//                        ));
-//                    });
-//        }
-//
-//        Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).info(diagnostics.toString());
-//        return diagnostics;
-//    }
+    private List<Diagnostic> getDiagnostics(Node node, Map<RefactorPatternTypes, Boolean> refactorPatternTypes) {
+        List<Diagnostic> diagnostics = new ArrayList<>();
+        if (node.getRange().isPresent()) {
+            refactorPatternTypes
+                    .entrySet()
+                    .stream()
+                    .filter(Entry::getValue)
+                    .map(Entry::getKey)
+                    .findFirst()
+                    .ifPresent(refactorPattern -> {
+                        com.github.javaparser.Range javaRange = node.getRange().get();
+                        Range lspRange = new Range(
+                                new Position(javaRange.begin.line - 1, javaRange.begin.column - 1),
+                                new Position(javaRange.end.line - 1, javaRange.end.column - 1)
+                        );
+
+                        diagnostics.add(new Diagnostic(
+                                lspRange,
+                                "Can refactor this into a " + RefactorPatternTypes.getValue(refactorPattern),
+                                DiagnosticSeverity.Information,
+                                "Make Java Great Again"
+                        ));
+                    });
+        }
+
+        Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).info(diagnostics.toString());
+        return diagnostics;
+    }
 
     public List<VariableDeclarator> getVariableDeclarationExprs() {
         return this.variableDeclarationExprs;
