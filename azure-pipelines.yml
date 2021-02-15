@@ -1,3 +1,6 @@
+variables:
+  YARN_CACHE_FOLDER: $(Pipeline.Workspace)/.yarn
+
 trigger:
   branches:
     include:
@@ -31,7 +34,21 @@ steps:
   displayName: Start xvfb
   condition: and(succeeded(), eq(variables['Agent.OS'], 'Linux'))
 
-- bash: yarn install --frozen-lockfile && yarn compile && yarn test
+- task: Cache@2
+  inputs:
+    key: 'yarn | "$(Agent.OS)" | yarn.lock'
+    restoreKeys: |
+       yarn | "$(Agent.OS)"
+    path: $(YARN_CACHE_FOLDER)
+  displayName: Cache Yarn packages
+
+- script: yarn --frozen-lockfile
+  displayName: Install Yarn packages
+
+- script: yarn compile
+  displayName: Build Tests
+
+- bash: yarn test
   displayName: Run Tests
   env:
     DISPLAY: ':99.0'
