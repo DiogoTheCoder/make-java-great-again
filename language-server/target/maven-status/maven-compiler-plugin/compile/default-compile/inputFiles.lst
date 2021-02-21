@@ -1,8 +1,8 @@
-/Users/diogocosta/Work/computer-science/cs3072/make-java-great-again/language-server/src/main/java/org/brunel/fyp/langserver/refactorings/ForEachRefactoringPattern.java
-/Users/diogocosta/Work/computer-science/cs3072/make-java-great-again/language-server/src/main/java/org/brunel/fyp/langserver/refactorings/ForLoopRefactoringPattern.java
-/Users/diogocosta/Work/computer-science/cs3072/make-java-great-again/language-server/src/main/java/org/brunel/fyp/langserver/MJGATextDocumentService.java
-/Users/diogocosta/Work/computer-science/cs3072/make-java-great-again/language-server/src/main/java/org/brunel/fyp/langserver/MJGALanguageServer.java
-/Users/diogocosta/Work/computer-science/cs3072/make-java-great-again/language-server/src/main/java/org/brunel/fyp/langserver/refactorings/MJGARefactoringPattern.java
-/Users/diogocosta/Work/computer-science/cs3072/make-java-great-again/language-server/src/main/java/org/brunel/fyp/langserver/refactorings/RefactorPatternTypes.java
-/Users/diogocosta/Work/computer-science/cs3072/make-java-great-again/language-server/src/main/java/org/brunel/fyp/langserver/Utils.java
-/Users/diogocosta/Work/computer-science/cs3072/make-java-great-again/language-server/src/main/java/org/brunel/fyp/langserver/MJGAWorkspaceService.java
+P:\FYP\brunel-fyp\language-server\src\main\java\org\brunel\fyp\langserver\refactorings\ForEachRefactoringPattern.java
+P:\FYP\brunel-fyp\language-server\src\main\java\org\brunel\fyp\langserver\refactorings\ForLoopRefactoringPattern.java
+P:\FYP\brunel-fyp\language-server\src\main\java\org\brunel\fyp\langserver\Utils.java
+P:\FYP\brunel-fyp\language-server\src\main\java\org\brunel\fyp\langserver\MJGALanguageServer.java
+P:\FYP\brunel-fyp\language-server\src\main\java\org\brunel\fyp\langserver\refactorings\MJGARefactoringPattern.java
+P:\FYP\brunel-fyp\language-server\src\main\java\org\brunel\fyp\langserver\refactorings\RefactorPatternTypes.java
+P:\FYP\brunel-fyp\language-server\src\main\java\org\brunel\fyp\langserver\MJGATextDocumentService.java
+P:\FYP\brunel-fyp\language-server\src\main\java\org\brunel\fyp\langserver\MJGAWorkspaceService.java
