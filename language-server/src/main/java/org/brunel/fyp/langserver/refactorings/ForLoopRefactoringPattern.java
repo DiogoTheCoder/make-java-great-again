@@ -1,8 +1,6 @@
 package org.brunel.fyp.langserver.refactorings;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Optional;
 
 import com.github.javaparser.StaticJavaParser;

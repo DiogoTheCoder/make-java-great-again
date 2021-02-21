@@ -37,7 +37,7 @@ public class MJGATextDocumentService implements TextDocumentService {
     }
 
     public CompilationUnit parseFile(String filePath) throws FileNotFoundException {
-        filePath = filePath.replaceAll("file:", "");
+        filePath = Utilis.formatFileUri(filePath);
         LOGGER.info("Parsing Java code from file: " + filePath);
 
         CompilationUnit compilationUnit = StaticJavaParser.parse(new FileInputStream(filePath));
@@ -91,7 +91,6 @@ public class MJGATextDocumentService implements TextDocumentService {
 
         for (ForEachStmt forEachStmt : compilationUnit.findAll(ForEachStmt.class)) {
             LinkedHashMap<RefactorPatternTypes, Boolean> refactorPatternTypes = new ForEachRefactoringPattern().refactorable(forEachStmt, compilationUnit);
-            LOGGER.info(refactorPatternTypes.toString());
             if (!refactorPatternTypes.isEmpty()) {
                 diagnostics.addAll(this.getDiagnostics(forEachStmt, refactorPatternTypes));
             }
@@ -173,7 +172,6 @@ public class MJGATextDocumentService implements TextDocumentService {
             );
 
             WorkspaceEdit workspaceEdit = new WorkspaceEdit(textDocumentEdit);
-            LOGGER.info(workspaceEdit.toString());
             refactorCodeAction.setEdit(workspaceEdit);
         } catch (FileNotFoundException e) {
             LOGGER.log(Level.SEVERE, e.getMessage());
@@ -249,7 +247,6 @@ public class MJGATextDocumentService implements TextDocumentService {
         File file = new File(didOpenTextDocumentParams.getTextDocument().getUri().replace("file:", ""));
 
         try {
-            LOGGER.info(file.getPath());
             CompilationUnit compilationUnit = this.parseFile(file.getPath());
             this.showRefactorableCode(compilationUnit, file.getPath());
         } catch (Exception e) {
@@ -262,7 +259,6 @@ public class MJGATextDocumentService implements TextDocumentService {
         File file = new File(didChangeTextDocumentParams.getTextDocument().getUri().replace("file:", ""));
 
         try {
-            LOGGER.info(file.getPath());
             CompilationUnit compilationUnit = this.parseFile(file.getPath());
             this.showRefactorableCode(compilationUnit, file.getPath());
         } catch (Exception e) {
