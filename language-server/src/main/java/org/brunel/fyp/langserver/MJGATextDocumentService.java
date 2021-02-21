@@ -15,7 +15,6 @@ import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.TextDocumentService;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.*;
@@ -96,10 +95,8 @@ public class MJGATextDocumentService implements TextDocumentService {
             }
         }
 
-        if (!diagnostics.isEmpty()) {
-            MJGALanguageServer.getInstance().getLanguageClient()
-                    .publishDiagnostics(new PublishDiagnosticsParams(filePath, diagnostics));
-        }
+        MJGALanguageServer.getInstance().getLanguageClient()
+                .publishDiagnostics(new PublishDiagnosticsParams(filePath, diagnostics));
     }
 
     private List<Diagnostic> getDiagnostics(Node node, LinkedHashMap<RefactorPatternTypes, Boolean> refactorPatternTypes) {
@@ -123,7 +120,7 @@ public class MJGATextDocumentService implements TextDocumentService {
                                 lspRange,
                                 "Can refactor this into a " + pattern,
                                 DiagnosticSeverity.Information,
-                                "Make Java Great Again",
+                                Utils.SOURCE_NAME,
                                 pattern
                         ));
                     });
@@ -134,15 +131,22 @@ public class MJGATextDocumentService implements TextDocumentService {
 
     @Override
     public CompletableFuture<List<Either<Command, CodeAction>>> codeAction(CodeActionParams params) {
+        List<Either<Command, CodeAction>> eitherList = new ArrayList<>();
         List<Diagnostic> diagnostics = params.getContext().getDiagnostics();
+        if (diagnostics.isEmpty()) {
+            return CompletableFuture.supplyAsync(() -> eitherList);
+        }
+
         Optional<Diagnostic> diagnosticOptional = diagnostics
                 .stream()
-                .filter(diagnostic -> diagnostic.getSource().equals("Make Java Great Again"))
+                .filter(diagnostic -> diagnostic.getSource().equals(Utils.SOURCE_NAME))
                 .findFirst();
 
         if (!diagnosticOptional.isPresent()) {
-            return null;
+            return CompletableFuture.supplyAsync(() -> eitherList);
         }
+
+        LOGGER.info(diagnosticOptional.get().toString());
 
         Diagnostic diagnostic = diagnosticOptional.get();
         String title = String.format("Refactor to %s", diagnostic.getCode().getLeft());
@@ -173,13 +177,12 @@ public class MJGATextDocumentService implements TextDocumentService {
 
             WorkspaceEdit workspaceEdit = new WorkspaceEdit(textDocumentEdit);
             refactorCodeAction.setEdit(workspaceEdit);
+
+            Either<Command, CodeAction> commandOrCodeAction = Either.forRight(refactorCodeAction);
+            return CompletableFuture.supplyAsync(() -> Collections.singletonList(commandOrCodeAction));
         } catch (FileNotFoundException e) {
             LOGGER.log(Level.SEVERE, e.getMessage());
         }
-
-        Either<Command, CodeAction> commandOrCodeAction = Either.forRight(refactorCodeAction);
-        List<Either<Command, CodeAction>> eitherList = new ArrayList<>();
-        eitherList.add(commandOrCodeAction);
 
         return CompletableFuture.supplyAsync(() -> eitherList);
     }
