@@ -26,36 +26,6 @@ public class MJGAWorkspaceService implements WorkspaceService {
                     String fileUri = params.getArguments().get(0).toString();
                     CompilationUnit compilationUnit = this.parseFile(fileUri);
                     return MJGALanguageServer.getInstance().getTextDocumentService().refactor(compilationUnit);
-                } else if (params.getCommand().equals("mjga.langserver.refactorSnippet")) {
-                    List<Object> arguments = params.getArguments();
-                    String textDocumentIdentifierString = arguments.get(0).toString();
-                    String diagnosticString = arguments.get(1).toString();
-
-                    if (textDocumentIdentifierString.isEmpty() || diagnosticString.isEmpty()) {
-                        throw new RuntimeException("Invalid arguments for refactorSnippet");
-                    }
-
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    TextDocumentIdentifier textDocumentIdentifier = objectMapper.readValue(textDocumentIdentifierString, TextDocumentIdentifier.class);
-                    Diagnostic diagnostic = objectMapper.readValue(diagnosticString, Diagnostic.class);
-
-                    CompilationUnit compilationUnit = this.parseFile(textDocumentIdentifier.getUri());
-                    MJGALanguageServer languageServer = MJGALanguageServer.getInstance();
-                    String refactoredCode = languageServer.getTextDocumentService().refactorSnippet(compilationUnit, diagnostic.getRange());
-
-                    com.github.javaparser.Range compilationUnitRange = compilationUnit.getRange().get();
-                    Range lspRange = new Range(
-                            new Position(compilationUnitRange.begin.line - 1, compilationUnitRange.begin.column - 1),
-                            new Position(compilationUnitRange.end.line - 1, compilationUnitRange.end.column - 1)
-                    );
-
-                    List<TextEdit> textEdit = Collections.singletonList(new TextEdit(lspRange, compilationUnit.toString()));
-//                    List<TextDocumentEdit> textDocumentEdit = Collections.singletonList(new TextDocumentEdit(versionedTextDocumentIdentifier, textEdit));
-//                    languageServer.getLanguageClient().applyEdit(new ApplyWorkspaceEditParams(
-//                        new WorkspaceEdit(textDocumentEdit)
-//                    ));
-
-                    return refactoredCode;
                 }
             } catch (Throwable e) {
                 LOGGER.log(Level.SEVERE, e.getMessage());
