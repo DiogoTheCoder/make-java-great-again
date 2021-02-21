@@ -11,39 +11,15 @@ import com.github.javaparser.printer.PrettyPrinterConfiguration;
 import org.brunel.fyp.langserver.refactorings.ForEachRefactoringPattern;
 import org.brunel.fyp.langserver.refactorings.ForLoopRefactoringPattern;
 import org.brunel.fyp.langserver.refactorings.RefactorPatternTypes;
-import org.eclipse.lsp4j.CodeLens;
-import org.eclipse.lsp4j.CodeLensParams;
-import org.eclipse.lsp4j.CompletionItem;
-import org.eclipse.lsp4j.CompletionList;
-import org.eclipse.lsp4j.CompletionParams;
-import org.eclipse.lsp4j.Diagnostic;
-import org.eclipse.lsp4j.DiagnosticSeverity;
-import org.eclipse.lsp4j.DidChangeTextDocumentParams;
-import org.eclipse.lsp4j.DidCloseTextDocumentParams;
-import org.eclipse.lsp4j.DidOpenTextDocumentParams;
-import org.eclipse.lsp4j.DidSaveTextDocumentParams;
-import org.eclipse.lsp4j.DocumentFormattingParams;
-import org.eclipse.lsp4j.DocumentOnTypeFormattingParams;
-import org.eclipse.lsp4j.DocumentRangeFormattingParams;
-import org.eclipse.lsp4j.Location;
-import org.eclipse.lsp4j.Position;
-import org.eclipse.lsp4j.PublishDiagnosticsParams;
-import org.eclipse.lsp4j.Range;
-import org.eclipse.lsp4j.ReferenceParams;
-import org.eclipse.lsp4j.RenameParams;
-import org.eclipse.lsp4j.TextEdit;
-import org.eclipse.lsp4j.WorkspaceEdit;
+import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.TextDocumentService;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 
@@ -61,6 +37,7 @@ public class MJGATextDocumentService implements TextDocumentService {
     }
 
     public CompilationUnit parseFile(String filePath) throws FileNotFoundException {
+        filePath = filePath.replaceAll("file:", "");
         LOGGER.info("Parsing Java code from file: " + filePath);
 
         CompilationUnit compilationUnit = StaticJavaParser.parse(new FileInputStream(filePath));
@@ -157,28 +134,59 @@ public class MJGATextDocumentService implements TextDocumentService {
         return diagnostics;
     }
 
-//    @Override
-//    public CompletableFuture<List<? extends Command>> codeAction(CodeActionParams codeActionParams) {
-//        List<Diagnostic> diagnostics = codeActionParams.getContext().getDiagnostics();
-//        Optional<Diagnostic> diagnosticOptional = diagnostics
-//                .stream()
-//                .filter(diagnostic -> diagnostic.getSource().equals("Make Java Great Again"))
-//                .findFirst();
-//
-//        if (!diagnosticOptional.isPresent()) {
-//            return null;
-//        }
-//
-//        Diagnostic diagnostic = diagnosticOptional.get();
-//        String title = String.format("Refactor to %s", diagnostic.getCode());
-//        List<Object> arguments = Arrays.asList(codeActionParams.getTextDocument(), diagnostic);
-//        return CompletableFuture.supplyAsync(() -> Collections.singletonList(new Command(
-//                title,
-//                "mjga.langserver.refactorSnippet",
-//                arguments
-//            )
-//        ));
-//    }
+    @Override
+    public CompletableFuture<List<Either<Command, CodeAction>>> codeAction(CodeActionParams params) {
+        List<Diagnostic> diagnostics = params.getContext().getDiagnostics();
+        Optional<Diagnostic> diagnosticOptional = diagnostics
+                .stream()
+                .filter(diagnostic -> diagnostic.getSource().equals("Make Java Great Again"))
+                .findFirst();
+
+        if (!diagnosticOptional.isPresent()) {
+            return null;
+        }
+
+        Diagnostic diagnostic = diagnosticOptional.get();
+        String title = String.format("Refactor to %s", diagnostic.getCode());
+        List<Object> arguments = Arrays.asList(params.getTextDocument(), diagnostic);
+        CodeAction refactorCodeAction = new CodeAction();
+        refactorCodeAction.setTitle(title);
+        refactorCodeAction.setKind("quickfix");
+
+        String filePath = params.getTextDocument().getUri();
+        try {
+            CompilationUnit compilationUnit = this.parseFile(filePath);
+            MJGALanguageServer languageServer = MJGALanguageServer.getInstance();
+
+            String refactoredCode = languageServer.getTextDocumentService().refactorSnippet(compilationUnit, diagnostic.getRange());
+            com.github.javaparser.Range compilationUnitRange = compilationUnit.getRange().get();
+            Range lspRange = new Range(
+                    new Position(compilationUnitRange.begin.line - 1, compilationUnitRange.begin.column - 1),
+                    new Position(compilationUnitRange.end.line, compilationUnitRange.end.column)
+            );
+
+            TextEdit textEdit = new TextEdit(lspRange, refactoredCode);
+
+            List<Either<TextDocumentEdit, ResourceOperation>> textDocumentEdit = Collections.singletonList(
+                    Either.forLeft(new TextDocumentEdit(
+                        new VersionedTextDocumentIdentifier(filePath, 1),
+                        Collections.singletonList(textEdit)
+                    ))
+            );
+
+            WorkspaceEdit workspaceEdit = new WorkspaceEdit(textDocumentEdit);
+            LOGGER.info(workspaceEdit.toString());
+            refactorCodeAction.setEdit(workspaceEdit);
+        } catch (FileNotFoundException e) {
+            LOGGER.log(Level.SEVERE, e.getMessage());
+        }
+
+        Either<Command, CodeAction> commandOrCodeAction = Either.forRight(refactorCodeAction);
+        List<Either<Command, CodeAction>> eitherList = new ArrayList<>();
+        eitherList.add(commandOrCodeAction);
+
+        return CompletableFuture.supplyAsync(() -> eitherList);
+    }
 
     public List<VariableDeclarator> getVariableDeclarationExprs() {
         return this.variableDeclarationExprs;
