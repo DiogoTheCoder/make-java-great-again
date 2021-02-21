@@ -1,13 +1,17 @@
 package org.brunel.fyp.langserver;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javaparser.ast.CompilationUnit;
+import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DidChangeConfigurationParams;
 import org.eclipse.lsp4j.DidChangeWatchedFilesParams;
 import org.eclipse.lsp4j.ExecuteCommandParams;
 import org.eclipse.lsp4j.SymbolInformation;
+import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.eclipse.lsp4j.WorkspaceSymbolParams;
 import org.eclipse.lsp4j.services.WorkspaceService;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -17,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
 import static org.brunel.fyp.langserver.MJGALanguageServer.LOGGER;
 
 public class MJGAWorkspaceService implements WorkspaceService {
-    private JSONObject configurationSettings;
+    private JsonNode configurationSettings;
 
     @Override
     public CompletableFuture<Object> executeCommand(ExecuteCommandParams params) {
@@ -37,6 +41,14 @@ public class MJGAWorkspaceService implements WorkspaceService {
                     e.printStackTrace();
                     return e.toString();
                 }
+            } else if (params.getCommand().equals("mjga.langserver.refactorSnippet")) {
+                List<Object> arguments = params.getArguments();
+                TextDocumentIdentifier textDocumentIdentifier = (TextDocumentIdentifier) arguments.get(0);
+                Diagnostic diagnostic = (Diagnostic) arguments.get(1);
+
+                LOGGER.info(textDocumentIdentifier.toString());
+                LOGGER.info(diagnostic.toString());
+                return "Hello World";
             }
 
             throw new UnsupportedOperationException();
@@ -50,8 +62,12 @@ public class MJGAWorkspaceService implements WorkspaceService {
 
     @Override
     public void didChangeConfiguration(DidChangeConfigurationParams didChangeConfigurationParams) {
-        this.configurationSettings = new JSONObject(didChangeConfigurationParams.getSettings().toString())
-                .getJSONObject("java");
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            this.configurationSettings = mapper.readTree(didChangeConfigurationParams.getSettings().toString()).get("java");
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -59,7 +75,7 @@ public class MJGAWorkspaceService implements WorkspaceService {
 
     }
 
-    public JSONObject getConfigurationSettings() {
+    public JsonNode getConfigurationSettings() {
         return this.configurationSettings;
     }
 }

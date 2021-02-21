@@ -9,6 +9,7 @@ import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.LanguageServer;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -50,7 +51,7 @@ public class MJGALanguageServer implements LanguageServer, LanguageClientAware {
         capabilities.setTextDocumentSync(TextDocumentSyncKind.Full);
         capabilities.setCodeActionProvider(true);
 
-        List<String> commands = Collections.singletonList("mjga.langserver.refactorFile");
+        List<String> commands = Arrays.asList("mjga.langserver.refactorFile", "mjga.langserver.refactorSnippet");
         ExecuteCommandOptions executeCommandOptions = new ExecuteCommandOptions(commands);
         capabilities.setExecuteCommandProvider(executeCommandOptions);
 

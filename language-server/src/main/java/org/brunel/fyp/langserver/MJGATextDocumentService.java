@@ -11,46 +11,14 @@ import com.github.javaparser.printer.PrettyPrinterConfiguration;
 import org.brunel.fyp.langserver.refactorings.ForEachRefactoringPattern;
 import org.brunel.fyp.langserver.refactorings.ForLoopRefactoringPattern;
 import org.brunel.fyp.langserver.refactorings.RefactorPatternTypes;
-import org.eclipse.lsp4j.CodeActionParams;
-import org.eclipse.lsp4j.CodeLens;
-import org.eclipse.lsp4j.CodeLensParams;
-import org.eclipse.lsp4j.Command;
-import org.eclipse.lsp4j.CompletionItem;
-import org.eclipse.lsp4j.CompletionList;
-import org.eclipse.lsp4j.CompletionParams;
-import org.eclipse.lsp4j.Diagnostic;
-import org.eclipse.lsp4j.DiagnosticSeverity;
-import org.eclipse.lsp4j.DidChangeTextDocumentParams;
-import org.eclipse.lsp4j.DidCloseTextDocumentParams;
-import org.eclipse.lsp4j.DidOpenTextDocumentParams;
-import org.eclipse.lsp4j.DidSaveTextDocumentParams;
-import org.eclipse.lsp4j.DocumentFormattingParams;
-import org.eclipse.lsp4j.DocumentHighlight;
-import org.eclipse.lsp4j.DocumentOnTypeFormattingParams;
-import org.eclipse.lsp4j.DocumentRangeFormattingParams;
-import org.eclipse.lsp4j.DocumentSymbolParams;
-import org.eclipse.lsp4j.Hover;
-import org.eclipse.lsp4j.Location;
-import org.eclipse.lsp4j.Position;
-import org.eclipse.lsp4j.PublishDiagnosticsParams;
-import org.eclipse.lsp4j.Range;
-import org.eclipse.lsp4j.ReferenceParams;
-import org.eclipse.lsp4j.RenameParams;
-import org.eclipse.lsp4j.SignatureHelp;
-import org.eclipse.lsp4j.SymbolInformation;
-import org.eclipse.lsp4j.TextDocumentPositionParams;
-import org.eclipse.lsp4j.TextEdit;
-import org.eclipse.lsp4j.WorkspaceEdit;
+import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.TextDocumentService;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
@@ -127,16 +95,41 @@ public class MJGATextDocumentService implements TextDocumentService {
                                 new Position(javaRange.end.line - 1, javaRange.end.column - 1)
                         );
 
+                        String pattern = RefactorPatternTypes.getValue(refactorPattern);
                         diagnostics.add(new Diagnostic(
                                 lspRange,
-                                "Can refactor this into a " + RefactorPatternTypes.getValue(refactorPattern),
+                                "Can refactor this into a " + pattern,
                                 DiagnosticSeverity.Information,
-                                "Make Java Great Again"
+                                "Make Java Great Again",
+                                pattern
                         ));
                     });
         }
 
         return diagnostics;
+    }
+
+    @Override
+    public CompletableFuture<List<? extends Command>> codeAction(CodeActionParams codeActionParams) {
+        List<Diagnostic> diagnostics = codeActionParams.getContext().getDiagnostics();
+        Optional<Diagnostic> diagnosticOptional = diagnostics
+                .stream()
+                .filter(diagnostic -> diagnostic.getSource().equals("Make Java Great Again"))
+                .findFirst();
+
+        if (!diagnosticOptional.isPresent()) {
+            return null;
+        }
+
+        Diagnostic diagnostic = diagnosticOptional.get();
+        String title = String.format("Refactor to %s", diagnostic.getCode());
+        List<Object> arguments = Arrays.asList(codeActionParams.getTextDocument(), diagnostic);
+        return CompletableFuture.supplyAsync(() -> Collections.singletonList(new Command(
+                title,
+                "mjga.langserver.refactorSnippet",
+                arguments
+            )
+        ));
     }
 
     public List<VariableDeclarator> getVariableDeclarationExprs() {
@@ -189,12 +182,6 @@ public class MJGATextDocumentService implements TextDocumentService {
     public CompletableFuture<List<? extends SymbolInformation>> documentSymbol(DocumentSymbolParams documentSymbolParams) {
         LOGGER.info(documentSymbolParams.toString());
         return null;
-    }
-
-    @Override
-    public CompletableFuture<List<? extends Command>> codeAction(CodeActionParams codeActionParams) {
-        LOGGER.info(codeActionParams.toString());
-        return CompletableFuture.supplyAsync(() -> Collections.singletonList(new Command("Refactor to", "quickfix")));
     }
 
     @Override

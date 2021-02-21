@@ -1,5 +1,8 @@
 package org.brunel.fyp.langserver.refactorings;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
@@ -13,12 +16,14 @@ import com.github.javaparser.ast.stmt.ForEachStmt;
 import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.Type;
 import org.brunel.fyp.langserver.MJGALanguageServer;
-import org.json.JSONObject;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import static org.brunel.fyp.langserver.MJGALanguageServer.LOGGER;
 
 public class ForEachRefactoringPattern implements MJGARefactoringPattern {
     // Shared Variables
@@ -115,12 +120,21 @@ public class ForEachRefactoringPattern implements MJGARefactoringPattern {
         this.assignDeclaratorInitializer = assignDeclaratorOptionalInitializer.get();
 
         // Get list of operators from VS Code settings
-        JSONObject configurationSettings = MJGALanguageServer.getInstance().getWorkspaceService().getConfigurationSettings();
-        List<Object> operators = configurationSettings
-                .getJSONObject("refactor")
-                .getJSONObject("reduce")
-                .getJSONArray("operators")
-                .toList();
+        JsonNode configurationSettings = MJGALanguageServer.getInstance().getWorkspaceService().getConfigurationSettings();
+        List<String> operators;
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            String operatorsJsonArray = configurationSettings.get("refactor").get("reduce").get("operators").toString();
+            if (operatorsJsonArray.isEmpty()) {
+                return false;
+            }
+
+            String[] operatorsArray = mapper.readValue(operatorsJsonArray, String[].class);
+            operators = Arrays.asList(operatorsArray);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return false;
+        }
 
         AssignExpr.Operator assignOperator = assignOptional.get().getOperator();
         if (!operators.contains(assignOperator.name())) {
