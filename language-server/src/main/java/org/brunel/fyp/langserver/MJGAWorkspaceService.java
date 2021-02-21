@@ -4,17 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javaparser.ast.CompilationUnit;
-import org.eclipse.lsp4j.Diagnostic;
-import org.eclipse.lsp4j.DidChangeConfigurationParams;
-import org.eclipse.lsp4j.DidChangeWatchedFilesParams;
-import org.eclipse.lsp4j.ExecuteCommandParams;
-import org.eclipse.lsp4j.SymbolInformation;
-import org.eclipse.lsp4j.TextDocumentIdentifier;
-import org.eclipse.lsp4j.WorkspaceSymbolParams;
+import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.services.WorkspaceService;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
@@ -46,9 +42,22 @@ public class MJGAWorkspaceService implements WorkspaceService {
                     Diagnostic diagnostic = objectMapper.readValue(diagnosticString, Diagnostic.class);
 
                     CompilationUnit compilationUnit = this.parseFile(textDocumentIdentifier.getUri());
-                    String code = MJGALanguageServer.getInstance().getTextDocumentService().refactorSnippet(compilationUnit, diagnostic.getRange());
-                    LOGGER.info(code);
-                    return code;
+                    MJGALanguageServer languageServer = MJGALanguageServer.getInstance();
+                    String refactoredCode = languageServer.getTextDocumentService().refactorSnippet(compilationUnit, diagnostic.getRange());
+
+                    com.github.javaparser.Range compilationUnitRange = compilationUnit.getRange().get();
+                    Range lspRange = new Range(
+                            new Position(compilationUnitRange.begin.line - 1, compilationUnitRange.begin.column - 1),
+                            new Position(compilationUnitRange.end.line - 1, compilationUnitRange.end.column - 1)
+                    );
+
+                    List<TextEdit> textEdit = Collections.singletonList(new TextEdit(lspRange, compilationUnit.toString()));
+//                    List<TextDocumentEdit> textDocumentEdit = Collections.singletonList(new TextDocumentEdit(versionedTextDocumentIdentifier, textEdit));
+//                    languageServer.getLanguageClient().applyEdit(new ApplyWorkspaceEditParams(
+//                        new WorkspaceEdit(textDocumentEdit)
+//                    ));
+
+                    return refactoredCode;
                 }
             } catch (Throwable e) {
                 LOGGER.log(Level.SEVERE, e.getMessage());
