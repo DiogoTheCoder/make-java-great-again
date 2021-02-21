@@ -1,11 +1,8 @@
 package org.brunel.fyp.langserver.refactorings;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.logging.Logger;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
@@ -16,12 +13,11 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ForEachStmt;
-import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.Type;
-
 import org.brunel.fyp.langserver.MJGALanguageServer;
-import org.json.JSONObject;
+
+import java.util.*;
 
 public class ForEachRefactoringPattern implements MJGARefactoringPattern {
     // Shared Variables
@@ -49,8 +45,8 @@ public class ForEachRefactoringPattern implements MJGARefactoringPattern {
     }
 
     @Override
-    public Map<RefactorPatternTypes, Boolean> refactorable(Node node, CompilationUnit compilationUnit) {
-        return new HashMap<RefactorPatternTypes, Boolean>() {{
+    public LinkedHashMap<RefactorPatternTypes, Boolean> refactorable(Node node, CompilationUnit compilationUnit) {
+        return new LinkedHashMap<RefactorPatternTypes, Boolean>() {{
             put(RefactorPatternTypes.REDUCE, canConvertToReduce((ForEachStmt) node));
             put(RefactorPatternTypes.FOR_EACH, canConvertToForEach((ForEachStmt) node));
         }};
@@ -118,13 +114,21 @@ public class ForEachRefactoringPattern implements MJGARefactoringPattern {
         this.assignDeclaratorInitializer = assignDeclaratorOptionalInitializer.get();
 
         // Get list of operators from VS Code settings
-        JSONObject configurationSettings = MJGALanguageServer.getInstance().getWorkspaceService().getConfigurationSettings();
-        Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).info(configurationSettings.toString());
-        List<Object> operators = configurationSettings
-                .getJSONObject("refactor")
-                .getJSONObject("reduce")
-                .getJSONArray("operators")
-                .toList();
+        JsonNode configurationSettings = MJGALanguageServer.getInstance().getWorkspaceService().getConfigurationSettings();
+        List<String> operators;
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            String operatorsJsonArray = configurationSettings.get("refactor").get("reduce").get("operators").toString();
+            if (operatorsJsonArray.isEmpty()) {
+                return false;
+            }
+
+            String[] operatorsArray = mapper.readValue(operatorsJsonArray, String[].class);
+            operators = Arrays.asList(operatorsArray);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return false;
+        }
 
         AssignExpr.Operator assignOperator = assignOptional.get().getOperator();
         if (!operators.contains(assignOperator.name())) {

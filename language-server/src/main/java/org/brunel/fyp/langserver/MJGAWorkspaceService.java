@@ -1,45 +1,50 @@
 package org.brunel.fyp.langserver;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javaparser.ast.CompilationUnit;
-import org.eclipse.lsp4j.DidChangeConfigurationParams;
-import org.eclipse.lsp4j.DidChangeWatchedFilesParams;
-import org.eclipse.lsp4j.ExecuteCommandParams;
-import org.eclipse.lsp4j.SymbolInformation;
-import org.eclipse.lsp4j.WorkspaceSymbolParams;
+import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.services.WorkspaceService;
-import org.json.JSONObject;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.logging.Logger;
+import java.util.logging.Level;
+
+import static org.brunel.fyp.langserver.MJGALanguageServer.LOGGER;
 
 public class MJGAWorkspaceService implements WorkspaceService {
-    private JSONObject configurationSettings;
+    private JsonNode configurationSettings;
 
     @Override
     public CompletableFuture<Object> executeCommand(ExecuteCommandParams params) {
         return CompletableFuture.supplyAsync(() -> {
-            if (params.getCommand().equals("mjga.langserver.refactorFile")) {
-                // Get Arguments from VS Code
-                File file = new File(params.getArguments().get(0).toString());
-
-                String filePath = file.getPath().replaceAll("\"", "");
-                Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).info("Parsing Java code from file: " + filePath);
-
-                try {
-                    MJGATextDocumentService mjgaTextDocumentService = MJGALanguageServer.getInstance().getTextDocumentService();
-                    CompilationUnit compilationUnit = mjgaTextDocumentService.parseFile(filePath);
-                    return mjgaTextDocumentService.refactor(compilationUnit);
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                    return e.toString();
+            try {
+                if (params.getCommand().equals("mjga.langserver.refactorFile")) {
+                    String fileUri = params.getArguments().get(0).toString();
+                    CompilationUnit compilationUnit = this.parseFile(fileUri);
+                    return MJGALanguageServer.getInstance().getTextDocumentService().refactor(compilationUnit);
                 }
+            } catch (Throwable e) {
+                LOGGER.log(Level.SEVERE, e.getMessage());
+                return e;
             }
 
             throw new UnsupportedOperationException();
         });
+    }
+
+    private CompilationUnit parseFile(String fileUri) throws FileNotFoundException {
+        if (fileUri.isEmpty()) {
+            throw new RuntimeException("File URI provided is empty!");
+        }
+
+        fileUri = Utils.formatFileUri(fileUri);
+        LOGGER.info("Parsing Java code from file: " + fileUri);
+
+        MJGATextDocumentService mjgaTextDocumentService = MJGALanguageServer.getInstance().getTextDocumentService();
+        return mjgaTextDocumentService.parseFile(fileUri);
     }
 
     @Override
@@ -49,8 +54,12 @@ public class MJGAWorkspaceService implements WorkspaceService {
 
     @Override
     public void didChangeConfiguration(DidChangeConfigurationParams didChangeConfigurationParams) {
-        this.configurationSettings = new JSONObject(didChangeConfigurationParams.getSettings().toString())
-                .getJSONObject("java");
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            this.configurationSettings = mapper.readTree(didChangeConfigurationParams.getSettings().toString()).get("java");
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -58,7 +67,7 @@ public class MJGAWorkspaceService implements WorkspaceService {
 
     }
 
-    public JSONObject getConfigurationSettings() {
+    public JsonNode getConfigurationSettings() {
         return this.configurationSettings;
     }
 }

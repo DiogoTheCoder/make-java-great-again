@@ -47,7 +47,7 @@
         </plugins>
     </build>
     <properties>
-        <lsp4j.version>0.4.1</lsp4j.version>
+        <lsp4j.version>0.10.0</lsp4j.version>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
     </properties>
