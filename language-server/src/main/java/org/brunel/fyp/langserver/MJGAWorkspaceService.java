@@ -13,7 +13,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.logging.Logger;
+
+import static org.brunel.fyp.langserver.MJGALanguageServer.LOGGER;
 
 public class MJGAWorkspaceService implements WorkspaceService {
     private JSONObject configurationSettings;
@@ -26,7 +27,7 @@ public class MJGAWorkspaceService implements WorkspaceService {
                 File file = new File(params.getArguments().get(0).toString());
 
                 String filePath = file.getPath().replaceAll("\"", "");
-                Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).info("Parsing Java code from file: " + filePath);
+                LOGGER.info("Parsing Java code from file: " + filePath);
 
                 try {
                     MJGATextDocumentService mjgaTextDocumentService = MJGALanguageServer.getInstance().getTextDocumentService();

@@ -1,11 +1,5 @@
 package org.brunel.fyp.langserver.refactorings;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.logging.Logger;
-
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
@@ -16,12 +10,15 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ForEachStmt;
-import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.Type;
-
 import org.brunel.fyp.langserver.MJGALanguageServer;
 import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public class ForEachRefactoringPattern implements MJGARefactoringPattern {
     // Shared Variables
@@ -119,7 +116,6 @@ public class ForEachRefactoringPattern implements MJGARefactoringPattern {
 
         // Get list of operators from VS Code settings
         JSONObject configurationSettings = MJGALanguageServer.getInstance().getWorkspaceService().getConfigurationSettings();
-        Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).info(configurationSettings.toString());
         List<Object> operators = configurationSettings
                 .getJSONObject("refactor")
                 .getJSONObject("reduce")
