@@ -37,7 +37,7 @@ public class MJGATextDocumentService implements TextDocumentService {
     }
 
     public CompilationUnit parseFile(String filePath) throws FileNotFoundException {
-        filePath = Utilis.formatFileUri(filePath);
+        filePath = Utils.formatFileUri(filePath);
         LOGGER.info("Parsing Java code from file: " + filePath);
 
         CompilationUnit compilationUnit = StaticJavaParser.parse(new FileInputStream(filePath));
