@@ -145,7 +145,7 @@ public class MJGATextDocumentService implements TextDocumentService {
         }
 
         Diagnostic diagnostic = diagnosticOptional.get();
-        String title = String.format("Refactor to %s", diagnostic.getCode());
+        String title = String.format("Refactor to %s", diagnostic.getCode().getLeft());
         CodeAction refactorCodeAction = new CodeAction();
         refactorCodeAction.setTitle(title);
         refactorCodeAction.setKind("quickfix");
@@ -244,31 +244,29 @@ public class MJGATextDocumentService implements TextDocumentService {
 
     @Override
     public void didOpen(DidOpenTextDocumentParams didOpenTextDocumentParams) {
-        File file = new File(didOpenTextDocumentParams.getTextDocument().getUri().replace("file:", ""));
-
-        try {
-            CompilationUnit compilationUnit = this.parseFile(file.getPath());
-            this.showRefactorableCode(compilationUnit, file.getPath());
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, e.getMessage());
-        }
+        this.checkForRefactorableCode(didOpenTextDocumentParams.getTextDocument().getUri());
     }
 
     @Override
     public void didChange(DidChangeTextDocumentParams didChangeTextDocumentParams) {
-        File file = new File(didChangeTextDocumentParams.getTextDocument().getUri().replace("file:", ""));
-
-        try {
-            CompilationUnit compilationUnit = this.parseFile(file.getPath());
-            this.showRefactorableCode(compilationUnit, file.getPath());
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, e.getMessage());
-        }
+        this.checkForRefactorableCode(didChangeTextDocumentParams.getTextDocument().getUri());
     }
 
     @Override
     public void didClose(DidCloseTextDocumentParams didCloseTextDocumentParams) { }
 
     @Override
-    public void didSave(DidSaveTextDocumentParams didSaveTextDocumentParams) { }
+    public void didSave(DidSaveTextDocumentParams didSaveTextDocumentParams) {
+        this.checkForRefactorableCode(didSaveTextDocumentParams.getTextDocument().getUri());
+    }
+
+    private void checkForRefactorableCode(String filePath) {
+        try {
+            filePath = Utils.formatFileUri(filePath);
+            CompilationUnit compilationUnit = this.parseFile(filePath);
+            this.showRefactorableCode(compilationUnit, filePath);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, e.getMessage());
+        }
+    }
 }
