@@ -1,9 +1,6 @@
 package org.brunel.fyp.langserver;
 
-import java.io.File;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.util.logging.Level;
+import com.sun.jna.Platform;
 
 public class Utils {
     public static final String SOURCE_NAME = "Make Java Great Again";
@@ -11,9 +8,16 @@ public class Utils {
     public static String formatFileUri(String fileUri) {
         fileUri = fileUri.replaceFirst("file://", "");
         fileUri = fileUri.replaceFirst("%3A", "");
-        fileUri = fileUri.replace("\\", "/");
 
         MJGALanguageServer.LOGGER.info(fileUri);
+
+        if (Platform.isWindows()) {
+            fileUri = fileUri.replaceFirst("/", "");
+            fileUri = fileUri.replaceFirst("/", ":\\\\");
+            fileUri = fileUri.replace("/", "\\");
+        } else {
+            // TODO: check if we need to format anything
+        }
 
         return fileUri;
     }

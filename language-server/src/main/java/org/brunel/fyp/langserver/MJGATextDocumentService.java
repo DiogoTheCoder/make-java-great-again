@@ -16,6 +16,7 @@ import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.TextDocumentService;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
@@ -251,14 +252,14 @@ public class MJGATextDocumentService implements TextDocumentService {
             CompilationUnit compilationUnit = this.parseFile(filePath);
             this.showRefactorableCode(compilationUnit, filePath);
         } catch (Throwable e) {
-            LOGGER.log(Level.SEVERE, e.getMessage());
+            // LOGGER.log(Level.SEVERE, e.getMessage() + "\n\n" + Arrays.toString(e.getStackTrace()));
         }
     }
 
     public CompilationUnit parseFile(String filePath) throws IOException {
-        filePath = Utils.formatFileUri(filePath);
-        LOGGER.info("Parsing Java code from file: " + filePath);
-        CompilationUnit compilationUnit = StaticJavaParser.parse(new FileInputStream(filePath));
+        String formattedPath = Utils.formatFileUri(filePath);
+        LOGGER.info("Parsing Java code from file: " + formattedPath);
+        CompilationUnit compilationUnit = StaticJavaParser.parse(new File(formattedPath));
         variableDeclarationExprs = compilationUnit.findAll(VariableDeclarator.class);
 
         return compilationUnit;
