@@ -17,11 +17,7 @@ import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.Type;
 import org.brunel.fyp.langserver.MJGALanguageServer;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class ForEachRefactoringPattern implements MJGARefactoringPattern {
     // Shared Variables
@@ -49,8 +45,8 @@ public class ForEachRefactoringPattern implements MJGARefactoringPattern {
     }
 
     @Override
-    public Map<RefactorPatternTypes, Boolean> refactorable(Node node, CompilationUnit compilationUnit) {
-        return new HashMap<RefactorPatternTypes, Boolean>() {{
+    public LinkedHashMap<RefactorPatternTypes, Boolean> refactorable(Node node, CompilationUnit compilationUnit) {
+        return new LinkedHashMap<RefactorPatternTypes, Boolean>() {{
             put(RefactorPatternTypes.REDUCE, canConvertToReduce((ForEachStmt) node));
             put(RefactorPatternTypes.FOR_EACH, canConvertToForEach((ForEachStmt) node));
         }};

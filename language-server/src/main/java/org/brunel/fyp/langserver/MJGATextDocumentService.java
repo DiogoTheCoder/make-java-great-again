@@ -75,8 +75,6 @@ public class MJGATextDocumentService implements TextDocumentService {
             compilationUnit = new ForLoopRefactoringPattern().refactor(loopNode, compilationUnit);
         } else if (className.equals(ForEachStmt.class.toString())) {
             compilationUnit = new ForEachRefactoringPattern().refactor(loopNode, compilationUnit);
-        } else {
-            throw new IllegalStateException("Unexpected value: " + className);
         }
 
         return compilationUnit.toString(new PrettyPrinterConfiguration().setOrderImports(true));
@@ -85,14 +83,15 @@ public class MJGATextDocumentService implements TextDocumentService {
     public void showRefactorableCode(CompilationUnit compilationUnit, String filePath) {
         List<Diagnostic> diagnostics = new ArrayList<>();
         for (ForStmt forStmt : compilationUnit.findAll(ForStmt.class)) {
-            Map<RefactorPatternTypes, Boolean> refactorPatternTypes = new ForLoopRefactoringPattern().refactorable(forStmt, compilationUnit);
+            LinkedHashMap<RefactorPatternTypes, Boolean> refactorPatternTypes = new ForLoopRefactoringPattern().refactorable(forStmt, compilationUnit);
             if (!refactorPatternTypes.isEmpty()) {
                 diagnostics.addAll(this.getDiagnostics(forStmt, refactorPatternTypes));
             }
         }
 
         for (ForEachStmt forEachStmt : compilationUnit.findAll(ForEachStmt.class)) {
-            Map<RefactorPatternTypes, Boolean> refactorPatternTypes = new ForEachRefactoringPattern().refactorable(forEachStmt, compilationUnit);
+            LinkedHashMap<RefactorPatternTypes, Boolean> refactorPatternTypes = new ForEachRefactoringPattern().refactorable(forEachStmt, compilationUnit);
+            LOGGER.info(refactorPatternTypes.toString());
             if (!refactorPatternTypes.isEmpty()) {
                 diagnostics.addAll(this.getDiagnostics(forEachStmt, refactorPatternTypes));
             }
@@ -104,7 +103,7 @@ public class MJGATextDocumentService implements TextDocumentService {
         }
     }
 
-    private List<Diagnostic> getDiagnostics(Node node, Map<RefactorPatternTypes, Boolean> refactorPatternTypes) {
+    private List<Diagnostic> getDiagnostics(Node node, LinkedHashMap<RefactorPatternTypes, Boolean> refactorPatternTypes) {
         List<Diagnostic> diagnostics = new ArrayList<>();
         if (node.getRange().isPresent()) {
             refactorPatternTypes
@@ -148,7 +147,6 @@ public class MJGATextDocumentService implements TextDocumentService {
 
         Diagnostic diagnostic = diagnosticOptional.get();
         String title = String.format("Refactor to %s", diagnostic.getCode());
-        List<Object> arguments = Arrays.asList(params.getTextDocument(), diagnostic);
         CodeAction refactorCodeAction = new CodeAction();
         refactorCodeAction.setTitle(title);
         refactorCodeAction.setKind("quickfix");

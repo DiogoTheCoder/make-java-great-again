@@ -1,6 +1,7 @@
 package org.brunel.fyp.langserver.refactorings;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -47,8 +48,8 @@ public class ForLoopRefactoringPattern implements MJGARefactoringPattern {
     }
 
     @Override
-    public Map<RefactorPatternTypes, Boolean> refactorable(Node node, CompilationUnit compilationUnit) {
-        return new HashMap<RefactorPatternTypes, Boolean>() {{
+    public LinkedHashMap<RefactorPatternTypes, Boolean> refactorable(Node node, CompilationUnit compilationUnit) {
+        return new LinkedHashMap<RefactorPatternTypes, Boolean>() {{
             put(RefactorPatternTypes.MAP, canConvertToMap((ForStmt) node));
             put(RefactorPatternTypes.FOR_EACH, canConvertToForEach((ForStmt) node));
         }};
