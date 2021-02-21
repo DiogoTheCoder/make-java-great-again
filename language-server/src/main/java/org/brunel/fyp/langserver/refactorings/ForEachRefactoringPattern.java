@@ -23,8 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.brunel.fyp.langserver.MJGALanguageServer.LOGGER;
-
 public class ForEachRefactoringPattern implements MJGARefactoringPattern {
     // Shared Variables
     NameExpr arrayVariable;

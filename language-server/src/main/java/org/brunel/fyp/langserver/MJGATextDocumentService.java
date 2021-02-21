@@ -57,6 +57,30 @@ public class MJGATextDocumentService implements TextDocumentService {
         return compilationUnit.toString(new PrettyPrinterConfiguration().setOrderImports(true));
     }
 
+    public String refactorSnippet(CompilationUnit compilationUnit, Range range) {
+        // Find which type of for loop it is and refactor it (using Range)!
+        int lineNumber = range.getStart().getLine() + 1;
+
+        Optional<Node> loopNodeOptional = compilationUnit.findFirst(Node.class, node -> node.getRange().get().begin.line == lineNumber);
+        if (!loopNodeOptional.isPresent()) {
+            // No action taken
+            return compilationUnit.toString(new PrettyPrinterConfiguration().setOrderImports(true));
+        }
+
+        Node loopNode = loopNodeOptional.get();
+        String className = loopNode.getClass().toString();
+
+        if (className.equals(ForStmt.class.toString())) {
+            compilationUnit = new ForLoopRefactoringPattern().refactor(loopNode, compilationUnit);
+        } else if (className.equals(ForEachStmt.class.toString())) {
+            compilationUnit = new ForEachRefactoringPattern().refactor(loopNode, compilationUnit);
+        } else {
+            throw new IllegalStateException("Unexpected value: " + className);
+        }
+
+        return compilationUnit.toString(new PrettyPrinterConfiguration().setOrderImports(true));
+    }
+
     public void showRefactorableCode(CompilationUnit compilationUnit, String filePath) {
         List<Diagnostic> diagnostics = new ArrayList<>();
         for (ForStmt forStmt : compilationUnit.findAll(ForStmt.class)) {

@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.logging.Level;
 
 import static org.brunel.fyp.langserver.MJGALanguageServer.LOGGER;
 
@@ -26,33 +27,51 @@ public class MJGAWorkspaceService implements WorkspaceService {
     @Override
     public CompletableFuture<Object> executeCommand(ExecuteCommandParams params) {
         return CompletableFuture.supplyAsync(() -> {
-            if (params.getCommand().equals("mjga.langserver.refactorFile")) {
-                // Get Arguments from VS Code
-                File file = new File(params.getArguments().get(0).toString());
+            try {
+                if (params.getCommand().equals("mjga.langserver.refactorFile")) {
+                    String fileUri = params.getArguments().get(0).toString();
+                    CompilationUnit compilationUnit = this.parseFile(fileUri);
+                    return MJGALanguageServer.getInstance().getTextDocumentService().refactor(compilationUnit);
+                } else if (params.getCommand().equals("mjga.langserver.refactorSnippet")) {
+                    List<Object> arguments = params.getArguments();
+                    String textDocumentIdentifierString = arguments.get(0).toString();
+                    String diagnosticString = arguments.get(1).toString();
 
-                String filePath = file.getPath().replaceAll("\"", "");
-                LOGGER.info("Parsing Java code from file: " + filePath);
+                    if (textDocumentIdentifierString.isEmpty() || diagnosticString.isEmpty()) {
+                        throw new RuntimeException("Invalid arguments for refactorSnippet");
+                    }
 
-                try {
-                    MJGATextDocumentService mjgaTextDocumentService = MJGALanguageServer.getInstance().getTextDocumentService();
-                    CompilationUnit compilationUnit = mjgaTextDocumentService.parseFile(filePath);
-                    return mjgaTextDocumentService.refactor(compilationUnit);
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                    return e.toString();
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    TextDocumentIdentifier textDocumentIdentifier = objectMapper.readValue(textDocumentIdentifierString, TextDocumentIdentifier.class);
+                    Diagnostic diagnostic = objectMapper.readValue(diagnosticString, Diagnostic.class);
+
+                    CompilationUnit compilationUnit = this.parseFile(textDocumentIdentifier.getUri());
+                    String code = MJGALanguageServer.getInstance().getTextDocumentService().refactorSnippet(compilationUnit, diagnostic.getRange());
+                    LOGGER.info(code);
+                    return code;
                 }
-            } else if (params.getCommand().equals("mjga.langserver.refactorSnippet")) {
-                List<Object> arguments = params.getArguments();
-                TextDocumentIdentifier textDocumentIdentifier = (TextDocumentIdentifier) arguments.get(0);
-                Diagnostic diagnostic = (Diagnostic) arguments.get(1);
-
-                LOGGER.info(textDocumentIdentifier.toString());
-                LOGGER.info(diagnostic.toString());
-                return "Hello World";
+            } catch (Throwable e) {
+                LOGGER.log(Level.SEVERE, e.getMessage());
+                return e;
             }
 
             throw new UnsupportedOperationException();
         });
+    }
+
+    private CompilationUnit parseFile(String fileUri) throws FileNotFoundException {
+        if (fileUri.isEmpty()) {
+            throw new RuntimeException("File URI provided is empty!");
+        }
+
+        File file = new File(fileUri);
+
+        String filePath = file.getPath().replaceAll("\"", "");
+        filePath = filePath.replaceAll("file:", "");
+        LOGGER.info("Parsing Java code from file: " + filePath);
+
+        MJGATextDocumentService mjgaTextDocumentService = MJGALanguageServer.getInstance().getTextDocumentService();
+        return mjgaTextDocumentService.parseFile(filePath);
     }
 
     @Override
