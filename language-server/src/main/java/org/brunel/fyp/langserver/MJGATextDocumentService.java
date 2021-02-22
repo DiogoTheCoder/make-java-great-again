@@ -17,7 +17,6 @@ import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.TextDocumentService;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
@@ -229,8 +228,6 @@ public class MJGATextDocumentService implements TextDocumentService {
 
     @Override
     public void didOpen(DidOpenTextDocumentParams didOpenTextDocumentParams) {
-        // LOGGER.info("didOpen before cahnges: " + didOpenTextDocumentParams.getTextDocument().getUri());
-        // LOGGER.info("didOpen after cahnges: " + Utils.formatFileUri(didOpenTextDocumentParams.getTextDocument().getUri()));
         this.checkForRefactorableCode(didOpenTextDocumentParams.getTextDocument().getUri());
     }
 
@@ -261,7 +258,7 @@ public class MJGATextDocumentService implements TextDocumentService {
         File file = new File(formattedPath);
 
         LOGGER.info("Parsing Java code from file: " + file.getPath());
-        
+
         CompilationUnit compilationUnit = StaticJavaParser.parse(file);
         variableDeclarationExprs = compilationUnit.findAll(VariableDeclarator.class);
 
