@@ -249,7 +249,7 @@ public class MJGATextDocumentService implements TextDocumentService {
             CompilationUnit compilationUnit = this.parseFile(filePath);
             this.showRefactorableCode(compilationUnit, filePath);
         } catch (Throwable e) {
-            // LOGGER.log(Level.SEVERE, e.getMessage() + "\n\n" + Arrays.toString(e.getStackTrace()));
+            LOGGER.log(Level.SEVERE, e.getMessage());
         }
     }
 
