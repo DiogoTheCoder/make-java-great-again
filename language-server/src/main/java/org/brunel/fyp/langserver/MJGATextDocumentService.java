@@ -258,8 +258,11 @@ public class MJGATextDocumentService implements TextDocumentService {
 
     public CompilationUnit parseFile(String filePath) throws IOException {
         String formattedPath = Utils.formatFileUri(filePath);
-        LOGGER.info("Parsing Java code from file: " + formattedPath);
-        CompilationUnit compilationUnit = StaticJavaParser.parse(new File(formattedPath));
+        File file = new File(formattedPath);
+
+        LOGGER.info("Parsing Java code from file: " + file.getPath());
+        
+        CompilationUnit compilationUnit = StaticJavaParser.parse(file);
         variableDeclarationExprs = compilationUnit.findAll(VariableDeclarator.class);
 
         return compilationUnit;

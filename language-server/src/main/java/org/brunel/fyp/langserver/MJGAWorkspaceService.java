@@ -37,7 +37,7 @@ public class MJGAWorkspaceService implements WorkspaceService {
 
     private CompilationUnit parseFile(String fileUri) throws IOException {
         if (fileUri.isEmpty()) {
-            throw new RuntimeException("File URI provided is empty!");
+            throw new IllegalArgumentException("File URI provided is empty!");
         }
 
         MJGATextDocumentService mjgaTextDocumentService = MJGALanguageServer.getInstance().getTextDocumentService();
