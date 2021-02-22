@@ -2,6 +2,7 @@ import * as assert from 'assert';
 import * as vscode from 'vscode';
 import { activate, getDocPath, sleep } from './helper';
 import { Commands } from '../../commands';
+import { TextDocument } from 'vscode';
 
 const hex = require('string-hex');
 
@@ -9,24 +10,22 @@ suite('Extension Test Suite', () => {
   vscode.window.showInformationMessage('Start all tests.');
 
   const FILE_PATH = getDocPath('App.java');
-  test('Loading Java file', async () => {
-    const textDocument = await vscode.workspace.openTextDocument(FILE_PATH);
-
-    assert.strictEqual(textDocument.getText().length > 0, true);
-  });
-
+  let textDocument: TextDocument;
   test('Connecting to Language Server', async () => {
     const ext = vscode.extensions.getExtension(
       'DiogoTheCoder.make-java-great-again',
     )!;
 
-    await activate(FILE_PATH);
-
+    textDocument = await activate(FILE_PATH);
+    assert.strictEqual(textDocument.lineCount > 0, true);
     assert.strictEqual(ext.isActive, true);
 
-    await sleep(2000);
+    const text = textDocument.getText();
 
-    const textDocument = await vscode.workspace.openTextDocument(FILE_PATH);
+    console.log(text);
+
+    await sleep(2500);
+
     const diagnostics = vscode.languages.getDiagnostics(textDocument.uri);
     assert.strictEqual(diagnostics.length, 1);
 
@@ -43,11 +42,9 @@ suite('Extension Test Suite', () => {
   });
 
   test('Running Refactor Command', async () => {
-    const textDocument = await vscode.workspace.openTextDocument(FILE_PATH);
-
     // Run the refactor command, wait for reply back, then save
     await vscode.commands.executeCommand(Commands.REFACTOR_FILE);
-    await sleep(2000);
+    await sleep(2500);
     await textDocument.save();
 
     const refactoredCode = textDocument.getText().trim();

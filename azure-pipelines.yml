@@ -5,50 +5,50 @@ trigger:
   branches:
     include:
     - master
-  tags:
-    include:
-    - v*
 
 strategy:
   matrix:
-    linux:
+    Ubuntu:
       imageName: 'ubuntu-16.04'
-    mac:
+    macOS:
       imageName: 'macOS-10.15'
-    windows:
+    Windows:
       imageName: 'windows-2019'
 
 pool:
   vmImage: $(imageName)
 
 steps:
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '12.x'
+    displayName: 'Install Node.js'
 
-- task: NodeTool@0
-  inputs:
-    versionSpec: '12.x'
-  displayName: 'Install Node.js'
+  - bash: |
+      /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+      echo ">>> Started xvfb"
+    displayName: Start xvfb
+    condition: and(succeeded(), eq(variables['Agent.OS'], 'Linux'))
 
-- bash: |
-    /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-    echo ">>> Started xvfb"
-  displayName: Start xvfb
-  condition: and(succeeded(), eq(variables['Agent.OS'], 'Linux'))
+  - task: Cache@2
+    inputs:
+      key: 'yarn | "$(Agent.OS)" | yarn.lock'
+      restoreKeys: |
+        yarn | "$(Agent.OS)"
+      path: $(YARN_CACHE_FOLDER)
+    displayName: Cache@2
 
-- task: Cache@2
-  inputs:
-    key: 'yarn | "$(Agent.OS)" | yarn.lock'
-    restoreKeys: |
-       yarn | "$(Agent.OS)"
-    path: $(YARN_CACHE_FOLDER)
-  displayName: Cache Yarn packages
+  - script: yarn --frozen-lockfile
+    displayName: Install Dependencies
 
-- script: yarn --frozen-lockfile
-  displayName: Install Yarn packages
+  - script: yarn compile
+    displayName: Build Extension
 
-- script: yarn compile
-  displayName: Build Tests
+  - script: yarn serve
+    displayName: Build Language Server
 
-- bash: yarn test
-  displayName: Run Tests
-  env:
-    DISPLAY: ':99.0'
+  - script: yarn run pretest
+    displayName: Pre-test
+
+  - bash: node ./out/test/runTest.js
+    displayName: Run Tests
