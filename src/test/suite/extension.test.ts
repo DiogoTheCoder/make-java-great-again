@@ -1,15 +1,30 @@
 import * as assert from 'assert';
-
-// You can import and use all API from the 'vscode' module
-// as well as import your extension to test it
 import * as vscode from 'vscode';
-// import * as myExtension from '../../extension';
+import { activate, getDocPath } from './helper';
+import { Done } from 'mocha';
+import { strict, strictEqual } from 'assert';
 
 suite('Extension Test Suite', () => {
   vscode.window.showInformationMessage('Start all tests.');
 
-  test('Sample test', () => {
-    assert.equal([1, 2, 3].indexOf(5), -1);
-    assert.equal([1, 2, 3].indexOf(0), -1);
+  const FILE_PATH = getDocPath('App.java');
+  test('Loading Java file', async () => {
+    const textDocument = await vscode.workspace.openTextDocument(FILE_PATH);
+
+    assert.strictEqual(
+      textDocument.getText().length > 0,
+      true,
+      'Java file contains code',
+    );
+  });
+
+  test('Connecting to Language Server', async () => {
+    const ext = vscode.extensions.getExtension(
+      'DiogoTheCoder.make-java-great-again',
+    )!;
+
+    await activate(FILE_PATH);
+
+    assert.strictEqual(ext.isActive, true);
   });
 });
