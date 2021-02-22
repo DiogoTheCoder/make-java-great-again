@@ -2,8 +2,10 @@ package com.brunel.diogocosta.fyp.examples;
 
 import static java.lang.String.valueOf;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -41,11 +43,11 @@ public class App {
     private static CompilationUnit compilationUnit;
     private static List<VariableDeclarator> variableDeclarationExprs;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         /**
          * Testing refactoring code
          */
-        Path filePath = Paths.get("examples//src//main//java//com//brunel//diogocosta//fyp//examples//Refactor.java");
+        Path filePath = Paths.get("examples//src//main//java//com//brunel//diogocosta//fyp//examples//ForEachForEach.java");
         try {
             ParserConfiguration parserConfig = new ParserConfiguration();
             parserConfig.setAttributeComments(true);

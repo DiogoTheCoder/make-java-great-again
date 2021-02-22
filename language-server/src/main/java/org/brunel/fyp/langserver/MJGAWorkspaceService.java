@@ -7,7 +7,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.services.WorkspaceService;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
@@ -35,13 +35,10 @@ public class MJGAWorkspaceService implements WorkspaceService {
         });
     }
 
-    private CompilationUnit parseFile(String fileUri) throws FileNotFoundException {
+    private CompilationUnit parseFile(String fileUri) throws IOException {
         if (fileUri.isEmpty()) {
-            throw new RuntimeException("File URI provided is empty!");
+            throw new IllegalArgumentException("File URI provided is empty!");
         }
-
-        fileUri = Utils.formatFileUri(fileUri);
-        LOGGER.info("Parsing Java code from file: " + fileUri);
 
         MJGATextDocumentService mjgaTextDocumentService = MJGALanguageServer.getInstance().getTextDocumentService();
         return mjgaTextDocumentService.parseFile(fileUri);
