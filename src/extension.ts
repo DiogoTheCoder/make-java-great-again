@@ -27,6 +27,7 @@ export function activate(context: vscode.ExtensionContext) {
     'target',
     'launcher.jar',
   );
+
   const args: string[] = ['-cp', classPath];
 
   const command = 'java';

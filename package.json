@@ -23,7 +23,7 @@
     "lint": "eslint --fix \"**/*.{js,ts,tsx}\"",
     "pretest": "rm -rf out/test/suite/test && cp -R src/test/suite/test out/test/suite/test",
     "test": "yarn run build && yarn run pretest && node ./out/test/runTest.js",
-    "watch": "yarn run build && tsc -watch -p ./"
+    "watch": "tsc -watch -p ./"
   },
   "devDependencies": {
     "@types/flat": "^5.0.1",

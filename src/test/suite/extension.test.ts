@@ -21,10 +21,8 @@ suite('Extension Test Suite', () => {
     assert.strictEqual(ext.isActive, true);
 
     const text = textDocument.getText();
-
-    console.log(text);
-
-    await sleep(2500);
+    
+    await sleep(5000);
 
     const diagnostics = vscode.languages.getDiagnostics(textDocument.uri);
     assert.strictEqual(diagnostics.length, 1);
@@ -44,7 +42,7 @@ suite('Extension Test Suite', () => {
   test('Running Refactor Command', async () => {
     // Run the refactor command, wait for reply back, then save
     await vscode.commands.executeCommand(Commands.REFACTOR_FILE);
-    await sleep(2500);
+    await sleep(5000);
     await textDocument.save();
 
     const refactoredCode = textDocument.getText().trim();
