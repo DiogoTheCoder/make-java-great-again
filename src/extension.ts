@@ -7,6 +7,7 @@ import {
 } from 'vscode-languageclient';
 import { Commands } from './commands';
 import { displaySyntaxTree } from './commands/displaySyntaxTree';
+import fs from 'fs';
 import loadSettingsWindow from './commands/loadSettingsWindow';
 import { refactorFile } from './commands/refactorFile';
 
@@ -27,6 +28,13 @@ export function activate(context: vscode.ExtensionContext) {
     'target',
     'launcher.jar',
   );
+
+  if (!fs.existsSync(classPath)) {
+    throw Error(
+      'Unable to connect to the Make Java Great Again Language Server :(',
+    );
+  }
+
   const args: string[] = ['-cp', classPath];
 
   const command = 'java';

@@ -1,10 +1,11 @@
 import * as vscode from 'vscode';
+import { TextDocument } from 'vscode';
 import path from 'path';
 
 export let doc: vscode.TextDocument;
 export let editor: vscode.TextEditor;
 
-export async function activate(filePath: string) {
+export async function activate(filePath: string): Promise<TextDocument> {
   const ext = vscode.extensions.getExtension(
     'DiogoTheCoder.make-java-great-again',
   )!;
@@ -17,6 +18,8 @@ export async function activate(filePath: string) {
     console.error(e);
     throw Error(e);
   }
+
+  return doc;
 }
 
 export function getDocPath(relativePath: string) {
@@ -25,6 +28,6 @@ export function getDocPath(relativePath: string) {
   return path.join(__dirname, `test/src/${relativePath}`);
 }
 
-async function sleep(ms: number) {
+export async function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }

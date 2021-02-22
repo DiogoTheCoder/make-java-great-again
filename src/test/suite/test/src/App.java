@@ -1,5 +1,9 @@
 public class App {
     public static void main(String[] args) throws Exception {
-        System.out.println("Hello, World!");
+        List<String> names = Arrays.asList("Diogo", "Costa");
+
+        for (String string : names) {
+            System.out.println(string);
+        }
     }
 }
