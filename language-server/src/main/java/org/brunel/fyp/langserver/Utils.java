@@ -14,8 +14,6 @@ public class Utils {
             fileUri = fileUri.replaceFirst("/", "");
             fileUri = fileUri.replaceFirst("/", ":\\\\");
             fileUri = fileUri.replace("/", "\\");
-        } else {
-            // TODO: check if we need to update the path for UNIX
         }
 
         return fileUri;
