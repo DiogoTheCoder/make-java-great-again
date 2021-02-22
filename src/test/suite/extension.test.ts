@@ -19,16 +19,12 @@ suite('Extension Test Suite', () => {
   });
 
   test('Connecting to Language Server', async () => {
-    // const ext = vscode.extensions.getExtension(
-    //   'DiogoTheCoder.make-java-great-again',
-    // )!;
+    const ext = vscode.extensions.getExtension(
+      'DiogoTheCoder.make-java-great-again',
+    )!;
 
     await activate(FILE_PATH);
 
-    // assert.strictEqual(
-    //   ext.isActive,
-    //   true,
-    //   'Extension has been activated successfully',
-    // );
+    assert.strictEqual(ext.isActive, true);
   });
 });
