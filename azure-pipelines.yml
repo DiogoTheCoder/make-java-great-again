@@ -8,8 +8,8 @@ trigger:
 
 strategy:
   matrix:
-    Ubuntu:
-      imageName: 'ubuntu-16.04'
+#    Ubuntu:
+#      imageName: 'ubuntu-16.04'
     macOS:
       imageName: 'macOS-10.15'
     Windows:
