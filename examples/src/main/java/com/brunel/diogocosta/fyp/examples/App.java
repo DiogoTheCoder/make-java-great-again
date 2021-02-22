@@ -49,18 +49,10 @@ public class App {
          */
         Path filePath = Paths.get("examples//src//main//java//com//brunel//diogocosta//fyp//examples//ForEachForEach.java");
         try {
-            String path = "/p/FYP/brunel-fyp/examples/src/main/java/com/brunel/diogocosta/fyp/examples/ForEachForEach.java";
-            path = path.replaceFirst("/", "");
-            path = path.replaceFirst("/", ":\\\\");
-            path = path.replace("/", "\\");
-            System.out.println(System.getProperty("os.name"));
-            compilationUnit = StaticJavaParser.parse(new File(path));
-
-
-            // ParserConfiguration parserConfig = new ParserConfiguration();
-            // parserConfig.setAttributeComments(true);
-            // StaticJavaParser.setConfiguration(parserConfig);
-            // compilationUnit = StaticJavaParser.parse(new FileInputStream(filePath.toAbsolutePath().toString()));
+            ParserConfiguration parserConfig = new ParserConfiguration();
+            parserConfig.setAttributeComments(true);
+            StaticJavaParser.setConfiguration(parserConfig);
+            compilationUnit = StaticJavaParser.parse(new FileInputStream(filePath.toAbsolutePath().toString()));
 
             /**
              * Variables used for debugging/testing
