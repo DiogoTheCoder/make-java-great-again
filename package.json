@@ -16,13 +16,11 @@
   ],
   "main": "./out/extension.js",
   "scripts": {
-    "vscode:prepublish": "yarn run compile",
-    "compile": "tsc -p ./ && yarn run pretest",
-    "build": "yarn run compile && mvn clean install",
+    "vscode:prepublish": "yarn run build && yarn run test",
+    "build": "yarn run lint && tsc -p ./ && mvn clean install",
     "lint": "eslint --fix \"**/*.{js,ts,tsx}\"",
-    "watch": "yarn run pretest && tsc -watch -p ./",
-    "pretest": "cp -R src/test/suite/test out/test/suite/test",
-    "test": "yarn run compile && node ./out/test/runTest.js"
+    "pretest": "rm -rf out/test/suite/test && cp -R src/test/suite/test out/test/suite/test",
+    "test": "yarn run build && yarn run pretest && node ./out/test/runTest.js"
   },
   "devDependencies": {
     "@types/flat": "^5.0.1",

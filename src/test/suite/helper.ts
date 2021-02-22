@@ -25,6 +25,6 @@ export function getDocPath(relativePath: string) {
   return path.join(__dirname, `test/src/${relativePath}`);
 }
 
-async function sleep(ms: number) {
+export async function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
