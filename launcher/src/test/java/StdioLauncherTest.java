@@ -14,7 +14,7 @@ class StdioLauncherTest extends AbstractTest {
     void startServer() {
         try {
             // TODO: get output streaming working properly
-            OutputStream outputStream = new FileOutputStream(getLogFilePath());
+            OutputStream outputStream = new FileOutputStream(this.getLogFilePath());
             LanguageClient languageClient = StdioLauncher.startServer(System.in, outputStream);
 
             MJGALanguageServer mjgaLanguageServer = MJGALanguageServer.getInstance();
