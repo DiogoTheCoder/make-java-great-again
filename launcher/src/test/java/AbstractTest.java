@@ -3,6 +3,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -17,8 +18,9 @@ abstract public class AbstractTest {
     }
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws IOException {
         File logFile = new File(this.getLogFilePath());
+        logFile.createNewFile();
     }
 
     @AfterEach
