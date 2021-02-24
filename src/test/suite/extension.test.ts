@@ -21,7 +21,7 @@ suite('Extension Test Suite', () => {
     assert.strictEqual(ext.isActive, true);
 
     const text = textDocument.getText();
-    
+
     await sleep(5000);
 
     const diagnostics = vscode.languages.getDiagnostics(textDocument.uri);
