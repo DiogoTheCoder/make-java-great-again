@@ -1,7 +1,6 @@
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,21 +14,24 @@ public class StdioLauncher {
         Logger globalLogger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
         globalLogger.setLevel(Level.ALL);
 
-        // start the language server
+        // Start the language server
         startServer(System.in, System.out);
     }
 
     /**
-     * Start the language server.
-     * @param in System Standard input stream
-     * @param out System standard output stream
-     * @throws ExecutionException Unable to start the server
-     * @throws InterruptedException Unable to start the server
+     * Start up the Make Java Great Again Language Server
+     *
+     * @param in
+     * @param out
+     * @throws ExecutionException
+     * @throws InterruptedException
+     * @return
      */
-    private static void startServer(InputStream in, OutputStream out) throws ExecutionException, InterruptedException {
+    public static LanguageClient startServer(InputStream in, OutputStream out) throws ExecutionException, InterruptedException {
         // Initialize the MJGALanguageServer
         MJGALanguageServer languageServer = MJGALanguageServer.getInstance();
-        // Create JSON RPC launcher for HelloLanguageServer instance.
+
+        // Create JSON RPC launcher for MJGALanguageServer instance.
         Launcher<LanguageClient> launcher = LSPLauncher.createServerLauncher(languageServer, in, out);
 
         // Get the client that request to launch the LS.
@@ -39,9 +41,8 @@ public class StdioLauncher {
         languageServer.connect(client);
 
         // Start the listener for JsonRPC
-        Future<?> startListening = launcher.startListening();
+        launcher.startListening();
 
-        // Get the computed result from LS.
-        startListening.get();
+        return client;
     }
 }
