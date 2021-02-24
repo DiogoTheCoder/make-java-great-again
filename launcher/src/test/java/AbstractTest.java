@@ -1,6 +1,8 @@
 import org.brunel.fyp.langserver.MJGALanguageServer;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
+import java.io.File;
 import java.nio.file.FileSystems;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -12,6 +14,11 @@ abstract public class AbstractTest {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(YYYY_MM_DD);
         String filePath = String.format("src/test/resources/%s.log", simpleDateFormat.format(new Date()));
         return FileSystems.getDefault().getPath(filePath).toAbsolutePath().toString();
+    }
+
+    @BeforeEach
+    void setUp() {
+        File logFile = new File(this.getLogFilePath());
     }
 
     @AfterEach
