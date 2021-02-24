@@ -20,6 +20,7 @@ abstract public class AbstractTest {
     @BeforeEach
     void setUp() throws IOException {
         File logFile = new File(this.getLogFilePath());
+        logFile.getParentFile().mkdirs();
         logFile.createNewFile();
     }
 
