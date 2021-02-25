@@ -18,10 +18,18 @@ jobs:
         command: mvn verify --settings 'pom.xml'
     - save_cache:
         paths:
-        - ~/.m2
+            - ~/.m2
         key: maven-{{ checksum "/tmp/maven_cache_seed" }}
+    - run:
+        name: Save test results
+        command: |
+            mkdir -p ~/test-results/junit/
+            find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} ~/test-results/junit/ \;
+        when: always
     - store_test_results:
-        path: target/surefire-reports
+        path: ~/test-results
+    - store_artifacts:
+        path: ~/test-results/junit   
 workflows:
   maven_test:
     jobs:
