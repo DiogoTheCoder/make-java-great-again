@@ -1,11 +1,12 @@
-import Mocha from 'mocha';
-import glob from 'glob';
-import path from 'path';
+import * as Mocha from 'mocha';
+import * as glob from 'glob';
+import * as path from 'path';
 
 export function run(): Promise<void> {
   // Create the mocha test
   const mocha = new Mocha({
     ui: 'tdd',
+    color: true,
     timeout: 60 * 60 * 1000,
   });
 

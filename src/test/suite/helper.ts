@@ -1,6 +1,6 @@
+import * as path from 'path';
 import * as vscode from 'vscode';
 import { TextDocument } from 'vscode';
-import path from 'path';
 
 export let doc: vscode.TextDocument;
 export let editor: vscode.TextEditor;

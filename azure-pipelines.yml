@@ -8,12 +8,12 @@ trigger:
 
 strategy:
   matrix:
-#    Ubuntu:
-#      imageName: 'ubuntu-16.04'
-    macOS:
-      imageName: 'macOS-10.15'
-    Windows:
-      imageName: 'windows-2019'
+   Ubuntu:
+     imageName: 'ubuntu-16.04'
+    # macOS:
+    #   imageName: 'macOS-10.15'
+    # Windows:
+    #   imageName: 'windows-2019'
 
 pool:
   vmImage: $(imageName)
@@ -44,11 +44,7 @@ steps:
   - script: yarn compile
     displayName: Build Extension
 
-  - script: yarn serve
-    displayName: Build Language Server
-
-  - script: yarn run pretest
-    displayName: Pre-test
-
   - bash: node ./out/test/runTest.js
     displayName: Run Tests
+    env:
+      DISPLAY: ':99.0'

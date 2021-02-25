@@ -1,3 +1,4 @@
+import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import {
@@ -7,7 +8,6 @@ import {
 } from 'vscode-languageclient';
 import { Commands } from './commands';
 import { displaySyntaxTree } from './commands/displaySyntaxTree';
-import fs from 'fs';
 import loadSettingsWindow from './commands/loadSettingsWindow';
 import { refactorFile } from './commands/refactorFile';
 
