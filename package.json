@@ -20,7 +20,8 @@
     "compile": "tsc -p ./",
     "build": "mvn clean install",
     "lint": "eslint --fix \"**/*.{js,ts,tsx}\"",
-    "pretest": "rm -rf out/ && yarn run compile && cp -R src/test/suite/test out/test/suite/test",
+    "pretest": "rm -rf out/ && yarn run compile && yarn run copy-files",
+    "copy-files": "cp -a src/syntaxes out/syntaxes && cp -R src/test/suite/test out/test/suite/test",
     "test": "yarn run pretest && node ./out/test/runTest.js",
     "watch": "tsc -watch -p ./ "
   },
@@ -80,14 +81,14 @@
           ".java",
           ".class"
         ],
-        "configuration": "./language-configuration.json"
+        "configuration": "./src/syntaxes/language-configuration.json"
       }
     ],
     "grammars": [
       {
         "language": "java",
         "scopeName": "source.java",
-        "path": "./syntaxes/java.tmLanguage.json"
+        "path": "./src/syntaxes/java.tmLanguage.json"
       }
     ],
     "configuration": {
