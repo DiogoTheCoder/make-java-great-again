@@ -12,6 +12,8 @@ suite('Extension Test Suite', () => {
   const FILE_PATH = getDocPath('App.java');
   let textDocument: TextDocument;
   test('Connecting to Language Server', async () => {
+    await sleep(5000);
+
     const ext = vscode.extensions.getExtension(
       'DiogoTheCoder.make-java-great-again',
     )!;

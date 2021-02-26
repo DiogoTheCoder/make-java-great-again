@@ -10,10 +10,10 @@ strategy:
   matrix:
    Ubuntu:
      imageName: 'ubuntu-16.04'
-    # macOS:
-    #   imageName: 'macOS-10.15'
-    # Windows:
-    #   imageName: 'windows-2019'
+   macOS:
+     imageName: 'macOS-10.15'
+   Windows:
+     imageName: 'windows-2019'
 
 pool:
   vmImage: $(imageName)
