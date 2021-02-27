@@ -41,14 +41,10 @@ steps:
   - script: yarn --frozen-lockfile
     displayName: Install Dependencies
 
-  - script: yarn compile
-    displayName: Build Extension
-
   - script: yarn serve
     displayName: Build Language Server
 
-  - script: yarn run pretest
-    displayName: Pre-test
-
-  - bash: node ./out/test/runTest.js
-    displayName: Run Tests
+  - script: yarn run test
+    displayName: Build & Test
+    env:
+      DISPLAY: ':99.0'

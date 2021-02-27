@@ -10,9 +10,6 @@ require('deepdash')(_);
 export function displaySyntaxTree() {
   const editor = getEditor();
   const code = editor.document.getText();
-  if (typeof code !== 'string') {
-    throw Error('Was unable to read code!');
-  }
 
   // Get the last part of the filename (after the last slash), e.g. Refactor.java
   const filename = editor.document.fileName.substring(
@@ -38,7 +35,7 @@ export function displaySyntaxTree() {
     throw Error(error.message);
   }
 
-  ast = _.filterDeep(ast, (value, key, parent) => {
+  ast = _.filterDeep(ast, (value: any, key: any, parent: any) => {
     if (value !== null) {
       if (Array.isArray(value) && value.length === 0) {
         return false;

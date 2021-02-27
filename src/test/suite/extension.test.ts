@@ -16,11 +16,9 @@ suite('Extension Test Suite', () => {
       'DiogoTheCoder.make-java-great-again',
     )!;
 
-    textDocument = await activate(FILE_PATH);
+    textDocument = await activate(ext, FILE_PATH);
     assert.strictEqual(textDocument.lineCount > 0, true);
     assert.strictEqual(ext.isActive, true);
-
-    const text = textDocument.getText();
 
     await sleep(5000);
 
