@@ -41,7 +41,7 @@ steps:
   - script: yarn --frozen-lockfile
     displayName: Install Dependencies
 
-  - script: yarn serve
+  - script: yarn build
     displayName: Build Language Server
 
   - script: yarn run test
