@@ -23,7 +23,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   let classPath = path.join(
     __dirname,
-    '..',
+    '../../',
     'launcher',
     'target',
     'launcher.jar',

@@ -1,16 +1,15 @@
 import * as vscode from 'vscode';
-import { TextDocument } from 'vscode';
+import { Extension, TextDocument } from 'vscode';
 import path from 'path';
 
 export let doc: vscode.TextDocument;
 export let editor: vscode.TextEditor;
 
-export async function activate(filePath: string): Promise<TextDocument> {
-  const ext = vscode.extensions.getExtension(
-    'DiogoTheCoder.make-java-great-again',
-  )!;
-
-  await ext.activate();
+export async function activate(
+  extension: Extension<any>,
+  filePath: string,
+): Promise<TextDocument> {
+  await extension.activate();
   try {
     doc = await vscode.workspace.openTextDocument(filePath);
     editor = await vscode.window.showTextDocument(doc);
@@ -25,7 +24,7 @@ export async function activate(filePath: string): Promise<TextDocument> {
 export function getDocPath(relativePath: string) {
   // Resolve Windows nonsense
   relativePath = relativePath.replace('%3A', '');
-  return path.join(__dirname, `test/src/${relativePath}`);
+  return path.join(__dirname, `java/src/${relativePath}`);
 }
 
 export async function sleep(ms: number) {

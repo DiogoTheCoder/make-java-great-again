@@ -4,27 +4,16 @@
 		"module": "commonjs",
 		"target": "es2019",
 		"outDir": "out",
-		"lib": [
-			"ES2019"
-		],
+		"lib": ["ES2019"],
 		"sourceMap": true,
-		"rootDir": "src",
 		"strict": true,
 		"composite": true,
 		"esModuleInterop": true,
 		"suppressImplicitAnyIndexErrors": true,
-		"noImplicitAny": false,
 		"skipLibCheck": true,
+		"resolveJsonModule": true,
+		"allowJs" : true,
 	},
-	"include": [
-		"src"
-	],
-	"exclude": [
-		"node_modules",
-		"./node_modules",
-		"./node_modules/*",
-		"./node_modules/@types/node/index.d.ts",
-		"**/out/**",
-		".vscode-test"
-	]
+	"include": ["./src/**/*"],
+	"exclude": ["node_modules", ".vscode-test", "out"]
 }

@@ -26,7 +26,7 @@ export function writeCode(code: string): void {
 
   const formattedCode = prettier.format(code, {
     parser: 'java',
-    tabWidth: editor.options.tabSize,
+    tabWidth: Number.parseInt(editor.options.tabSize?.toString() ?? '4', 10),
   });
 
   const updateCode = new vscode.TextEdit(wholeDocument, formattedCode);
