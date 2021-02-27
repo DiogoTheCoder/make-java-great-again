@@ -19,7 +19,9 @@ suite('Extension Test Suite', () => {
     textDocument = await activate(ext, FILE_PATH);
     assert.strictEqual(textDocument.lineCount > 0, true);
     assert.strictEqual(ext.isActive, true);
+  });
 
+  test('Getting Code Highlighting', async () => {
     await sleep(5000);
 
     const diagnostics = vscode.languages.getDiagnostics(textDocument.uri);
