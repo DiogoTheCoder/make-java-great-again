@@ -1,11 +1,19 @@
 package com.brunel.diogocosta.fyp.examples;
 
-public class ForLoopForEach {
-    public static void main(String[] args) {
-        String[] names = { "Diogo", "Costa" };
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.IntStream;
 
-        for (int i = 0; i < names.length; i++) {
-            System.out.println(names[i]);
-        }
+public class ForLoopForEach {
+
+    public static void main(String[] args) {
+        List<String> names = Arrays.asList("Diogo", "Costa");
+        IntStream
+            .range(0, names.size())
+            .forEach(
+                i -> {
+                    System.out.println(names.get(i));
+                }
+            );
     }
 }
