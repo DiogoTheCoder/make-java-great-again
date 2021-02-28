@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 class StdioLauncherTest extends AbstractTest {
     @Test
-    void startServer() {
+    void testStartServer() {
         try {
             // TODO: get output streaming working properly
             OutputStream outputStream = new FileOutputStream(this.getLogFilePath());
