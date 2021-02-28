@@ -1,18 +1,21 @@
-<div style="text-align:center">
-  <img src="https://raw.githubusercontent.com/DiogoTheCoder/make-java-great-again/master/MJGA.png" alt="Make Java Great Again Logo">
-</div>
+<img align="left" width="33%" src="https://raw.githubusercontent.com/DiogoTheCoder/make-java-great-again/master/MJGA.png" alt="Make Java Great Again Logo">
 
-## 
 
 <div style="text-align:center">
     <img src="https://circleci.com/gh/DiogoTheCoder/make-java-great-again.svg?style=svg" alt="CircleCI Badge" />
     <img src="https://dev.azure.com/DiogoTheCoder/Make%20Java%20Great%20Again/_apis/build/status/DiogoTheCoder.make-java-great-again?branchName=master" alt="Azure Build" />
     <img src="https://app.codacy.com/project/badge/Grade/1eb2d5878dd44a12a8a12d7e9fce3e38" alt="Codacy Badge" />
-    <img src="https://flat.badgen.net/dependabot/thepracticaldev/dev.to?icon=dependabot" alt="Dependabot Badge" />
     <img src="https://aoindustries.com/ao-badges/java-8.svg" alt="java: &gt;= 8" />
 </div>
 
+<br />
+
 _Make Java Great Again! Refactoring to Functional_, is a dissertation-based project supervised by [@BrunelCS](https://github.com/BrunelCS) and [Dr Rumyana Neykova](https://www.brunel.ac.uk/people/rumyana-neykova), who's sole aim is to increase the usage of functional paradigms in Java and developer's confidence in using these paradigms.
+
+<br />
+<br />
+<br />
+<br />
 
 ## Features
 
