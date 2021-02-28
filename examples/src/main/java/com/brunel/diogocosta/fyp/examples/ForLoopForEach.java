@@ -1,4 +1,3 @@
-  
 package com.brunel.diogocosta.fyp.examples;
 
 public class ForLoopForEach {

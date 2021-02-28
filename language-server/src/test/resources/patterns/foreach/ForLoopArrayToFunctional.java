@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ForEachToFunctional {
-    public static void beforeRefactor() {
+    public static void refactorThis() {
         String[] names = { "Diogo", "Costa" };
 
         for (int i = 0; i < names.length; i++) {
@@ -12,7 +12,7 @@ public class ForEachToFunctional {
         }
     }
 
-    public static void afterRefactor() {
+    public static void expectedResult() {
         String[] names = { "Diogo", "Costa" };
         IntStream
                 .range(0, names.length)
