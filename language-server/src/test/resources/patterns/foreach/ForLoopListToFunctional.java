@@ -13,7 +13,7 @@ public class ForEachToFunctional {
     }
 
     public static void afterRefactor() {
-        String[] names = { "Diogo", "Costa" };
+        List<String> names = Arrays.asList("Diogo", "Costa");
         IntStream
                 .range(0, names.size())
                 .forEach(
