@@ -9,19 +9,29 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    reviewers:
+      - "DiogoTheCoder"
   - package-ecosystem: "maven"
     directory: "/"
     schedule:
       interval: "daily"
+    reviewers:
+      - "DiogoTheCoder"
   - package-ecosystem: "maven"
     directory: "/language-server"
     schedule:
       interval: "daily"
+    reviewers:
+      - "DiogoTheCoder"
   - package-ecosystem: "maven"
     directory: "/launcher"
     schedule:
       interval: "daily"
+    reviewers:
+      - "DiogoTheCoder"
   - package-ecosystem: "maven"
     directory: "/examples"
     schedule:
       interval: "daily"
+    reviewers:
+      - "DiogoTheCoder"
