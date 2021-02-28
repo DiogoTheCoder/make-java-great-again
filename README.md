@@ -1,5 +1,7 @@
 # Make Java Great Again!
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/46ec5272af6b4e44b90b04527c1f1a9f)](https://app.codacy.com/gh/DiogoTheCoder/make-java-great-again?utm_source=github.com&utm_medium=referral&utm_content=DiogoTheCoder/make-java-great-again&utm_campaign=Badge_Grade_Settings)
+
 _Make Java Great Again: Refactoring to Functional!_, is a dissertation-based project supervised by @BrunelCS and [Dr Rumyana Neykova](https://www.brunel.ac.uk/people/rumyana-neykova), who's sole aim is to increase the usage of functional paradigms in Java and developer's confidence in using these paradigms.
 
 ## Features
