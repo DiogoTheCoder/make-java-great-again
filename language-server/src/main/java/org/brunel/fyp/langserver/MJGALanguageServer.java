@@ -1,5 +1,6 @@
 package org.brunel.fyp.langserver;
 
+import org.brunel.fyp.langserver.commands.Commands;
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageClientAware;
@@ -46,7 +47,7 @@ public class MJGALanguageServer implements LanguageServer, LanguageClientAware {
         capabilities.setTextDocumentSync(TextDocumentSyncKind.Full);
         capabilities.setCodeActionProvider(true);
 
-        List<String> commands = Arrays.asList("mjga.langserver.refactorFile", "mjga.langserver.refactorSnippet");
+        List<String> commands = Arrays.asList(Commands.ALL_COMMANDS);
         ExecuteCommandOptions executeCommandOptions = new ExecuteCommandOptions(commands);
         capabilities.setExecuteCommandProvider(executeCommandOptions);
 
