@@ -1,65 +1,36 @@
-# make-java-great-again README
+# Make Java Great Again!
 
-This is the README for your extension "make-java-great-again". After writing up a brief description, we recommend including the following sections.
+_Make Java Great Again: Refactoring to Functional!_, is a dissertation-based project supervised by @BrunelCS and [Dr Rumyana Neykova](https://www.brunel.ac.uk/people/rumyana-neykova), who's sole aim is to increase the usage of functional paradigms in Java and developer's confidence in using these paradigms.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+Currently, this VS Code extension provides code highlighting, quick fixing and refactoring for the following patterns:
+* forEach
+* map
+* reduce
 
-For example if there is an image subfolder under your extension project workspace:
+> Code Highlighting
+> 
+> ![Code Highlighting](examples/foreach-codehighlight.png)
+> 
+> Quick Fix
+> 
+> ![Quick Fix](examples/foreach-quickfix.png)
+> 
+> Refactor Entire File
+>
+> ![Refactor](examples/reduce-refactorfile.gif)
 
-\!\[feature X\]\(images/feature-x.png\)
+### Contributing
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+In order to get this Project running locally on your machine for contributing, you'll need to clone this repo then run the following:
 
-## Requirements
+_Language Server_: `yarn build` (this will generate the appropriate `.jar` files, which need compiling after any changes made)
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
-
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
------------------------------------------------------------------------------------------------------------
-
-## Working with Markdown
-
-**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (macOS) to see a list of Markdown snippets
+_VS Code Extension_: `yarn compile` or `yarn watch`, preferably just running it via the Debugger on VS Code
 
 ### For more information
 
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+* 👨‍🏫 [Presentation](https://docs.google.com/presentation/d/1_jPc1FcllnkuTHoz4-MZNqDyj8vIujrTlvCh0h7rGds/edit?usp=sharing)
 
 **Enjoy!**
