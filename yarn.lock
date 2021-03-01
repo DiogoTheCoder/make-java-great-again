@@ -1136,10 +1136,10 @@ ms@2.1.2:
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.2.tgz#d09d1f357b443f493382a8eb3ccd183872ae6009"
   integrity sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==
 
-mulang@^5.3.0:
-  version "5.3.0"
-  resolved "https://registry.yarnpkg.com/mulang/-/mulang-5.3.0.tgz#4e273d55416f24f3b30ecd20ed59a0a697c11066"
-  integrity sha512-gSvxJHa6bgZ9xDTxScwvuxDl02drrk5hz73VZzTXdxCP1ldsC6xPTvRR45OcZlM5Bou94zSCAqp3cxqNWf7CQQ==
+mulang@^6.0.5:
+  version "6.0.5"
+  resolved "https://registry.yarnpkg.com/mulang/-/mulang-6.0.5.tgz#1b6a167bbf64b3de815d7993bbf1c8ed931136a1"
+  integrity sha512-iBSjKYVb1QbaQTJtKrZ3gnCn768Qq0EWEokQJL+qlNj6SGWZtTPM9vkk8+u7vrV5+K+zZVugO/y5X5MRL+ZBeg==
 
 nanoid@3.1.12:
   version "3.1.12"
