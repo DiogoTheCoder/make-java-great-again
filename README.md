@@ -18,9 +18,9 @@ _Make Java Great Again! Refactoring to Functional_, is a dissertation-based proj
 ## Features
 
 Currently, this VS Code extension provides code highlighting, quick fixing and refactoring for the following patterns:
-*  forEach
-*  map
-*  reduce
+*   forEach
+*   map
+*   reduce
 
 > Code Highlighting
 > 
@@ -46,6 +46,6 @@ Please ensure you are running Java 8, since this was when functional pardadigms 
 
 ### For more information
 
-*  👨‍🏫 [Presentation](https://docs.google.com/presentation/d/1_jPc1FcllnkuTHoz4-MZNqDyj8vIujrTlvCh0h7rGds/edit?usp=sharing)
+*   👨‍🏫 [Presentation](https://docs.google.com/presentation/d/1_jPc1FcllnkuTHoz4-MZNqDyj8vIujrTlvCh0h7rGds/edit?usp=sharing)
 
 **Enjoy!**

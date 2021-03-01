@@ -1,9 +1,6 @@
 package org.brunel.fyp.langserver;
 
-import java.util.Arrays;
-import java.util.List;
-
-public class ForEachToFunctional {
+public class ForLoopArrayToFunctional {
     public static void refactorThis() {
         String[] names = { "Diogo", "Costa" };
 
