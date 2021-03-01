@@ -7,7 +7,6 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.stmt.ForEachStmt;
 import com.github.javaparser.ast.stmt.ForStmt;
-import com.github.javaparser.printer.PrettyPrinterConfiguration;
 
 import org.brunel.fyp.langserver.refactorings.ForEachRefactoringPattern;
 import org.brunel.fyp.langserver.refactorings.ForLoopRefactoringPattern;
@@ -45,7 +44,7 @@ public class MJGATextDocumentService implements TextDocumentService {
             compilationUnit = new ForEachRefactoringPattern().refactor(forEachStmt, compilationUnit);
         }
 
-        return compilationUnit.toString(new PrettyPrinterConfiguration().setOrderImports(true));
+        return compilationUnit.toString(MJGAPrinterConfig.getConfig());
     }
 
     public String refactorSnippet(CompilationUnit compilationUnit, Range range) {
@@ -56,7 +55,7 @@ public class MJGATextDocumentService implements TextDocumentService {
                 node -> node.getRange().get().begin.line == lineNumber);
         if (!loopNodeOptional.isPresent()) {
             // No action taken
-            return compilationUnit.toString(new PrettyPrinterConfiguration().setOrderImports(true));
+            return compilationUnit.toString(MJGAPrinterConfig.getConfig());
         }
 
         Node loopNode = loopNodeOptional.get();
@@ -68,7 +67,7 @@ public class MJGATextDocumentService implements TextDocumentService {
             compilationUnit = new ForEachRefactoringPattern().refactor(loopNode, compilationUnit);
         }
 
-        return compilationUnit.toString(new PrettyPrinterConfiguration().setOrderImports(true));
+        return compilationUnit.toString(MJGAPrinterConfig.getConfig());
     }
 
     public void showRefactorableCode(CompilationUnit compilationUnit, String filePath) {

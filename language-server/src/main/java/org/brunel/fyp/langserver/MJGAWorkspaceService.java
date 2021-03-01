@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javaparser.ast.CompilationUnit;
+import org.brunel.fyp.langserver.commands.Commands;
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.services.WorkspaceService;
 
@@ -21,7 +22,7 @@ public class MJGAWorkspaceService implements WorkspaceService {
     public CompletableFuture<Object> executeCommand(ExecuteCommandParams params) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                if (params.getCommand().equals("mjga.langserver.refactorFile")) {
+                if (params.getCommand().equals(Commands.REFACTOR_FILE)) {
                     String fileUri = params.getArguments().get(0).toString();
                     CompilationUnit compilationUnit = this.parseFile(fileUri);
                     return MJGALanguageServer.getInstance().getTextDocumentService().refactor(compilationUnit);
