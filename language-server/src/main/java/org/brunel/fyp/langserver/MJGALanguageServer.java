@@ -65,7 +65,7 @@ public class MJGALanguageServer implements LanguageServer, LanguageClientAware {
     @Override
     public void exit() {
         // Kill the LS on exit request from client.
-        System.exit(errorCode);
+        Runtime.getRuntime().exit(errorCode);
     }
 
     @Override

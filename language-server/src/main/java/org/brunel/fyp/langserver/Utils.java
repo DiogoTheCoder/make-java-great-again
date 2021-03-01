@@ -2,20 +2,21 @@ package org.brunel.fyp.langserver;
 
 import com.sun.jna.Platform;
 
-public class Utils {
+public final class Utils {
     public static final String SOURCE_NAME = "Make Java Great Again";
 
     public static String formatFileUri(String fileUri) {
-        fileUri = fileUri.replaceAll("\"", "");
-        fileUri = fileUri.replaceFirst("file://", "");
-        fileUri = fileUri.replaceFirst("%3A", "");
+        String modifiedFileUri;
+        modifiedFileUri = fileUri.replaceAll("\"", "");
+        modifiedFileUri = modifiedFileUri.replaceFirst("file://", "");
+        modifiedFileUri = modifiedFileUri.replaceFirst("%3A", "");
 
         if (Platform.isWindows()) {
-            fileUri = fileUri.replaceFirst("/", "");
-            fileUri = fileUri.replaceFirst("/", ":\\\\");
-            fileUri = fileUri.replace("/", "\\");
+            modifiedFileUri = modifiedFileUri.replaceFirst("/", "");
+            modifiedFileUri = modifiedFileUri.replaceFirst("/", ":\\\\");
+            modifiedFileUri = modifiedFileUri.replace("/", "\\");
         }
 
-        return fileUri;
+        return modifiedFileUri;
     }
 }

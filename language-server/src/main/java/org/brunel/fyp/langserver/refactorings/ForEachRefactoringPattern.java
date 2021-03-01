@@ -21,13 +21,13 @@ import java.util.*;
 
 public class ForEachRefactoringPattern implements MJGARefactoringPattern {
     // Shared Variables
-    NameExpr arrayVariable;
-    VariableDeclarator arrayDeclarator;
+    private NameExpr arrayVariable;
+    private VariableDeclarator arrayDeclarator;
 
     // Reduce Variables
-    AssignExpr assignExpr;
-    Expression assignDeclaratorInitializer;
-    BinaryExpr.Operator assignBinaryExpressionOperator;
+    private AssignExpr assignExpr;
+    private Expression assignDeclaratorInitializer;
+    private BinaryExpr.Operator assignBinaryExpressionOperator;
 
     @Override
     public CompilationUnit refactor(Node node, CompilationUnit compilationUnit) {
@@ -65,7 +65,7 @@ public class ForEachRefactoringPattern implements MJGARefactoringPattern {
         if (arrayType.getClass().equals(ArrayType.class)) {
             // e.g. String[]
             template = "%s = Arrays.stream(%s).reduce(%s, (partial, %s) -> partial %s %s)";
-            compilationUnit.addImport(java.util.Arrays.class);
+            compilationUnit.addImport(Arrays.class);
         }
 
         template = String.format(
@@ -172,7 +172,7 @@ public class ForEachRefactoringPattern implements MJGARefactoringPattern {
         if (arrayType.getClass().equals(ArrayType.class)) {
             // e.g. String[]
             template = "Arrays.stream(%s).forEach(%s -> %s)";
-            compilationUnit.addImport(java.util.Arrays.class);
+            compilationUnit.addImport(Arrays.class);
         }
 
         template = String.format(

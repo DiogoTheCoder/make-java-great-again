@@ -1,6 +1,5 @@
 import org.brunel.fyp.langserver.MJGALanguageServer;
 import org.eclipse.lsp4j.services.LanguageClient;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.FileOutputStream;

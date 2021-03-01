@@ -36,15 +36,16 @@ public class MJGATextDocumentService implements TextDocumentService {
     }
 
     public String refactor(CompilationUnit compilationUnit) {
+        CompilationUnit refactoredCompilationUnit = compilationUnit;
         for (ForStmt forStmt : compilationUnit.findAll(ForStmt.class)) {
-            compilationUnit = new ForLoopRefactoringPattern().refactor(forStmt, compilationUnit);
+            refactoredCompilationUnit = new ForLoopRefactoringPattern().refactor(forStmt, compilationUnit);
         }
 
         for (ForEachStmt forEachStmt : compilationUnit.findAll(ForEachStmt.class)) {
-            compilationUnit = new ForEachRefactoringPattern().refactor(forEachStmt, compilationUnit);
+            refactoredCompilationUnit = new ForEachRefactoringPattern().refactor(forEachStmt, compilationUnit);
         }
 
-        return compilationUnit.toString(MJGAPrinterConfig.getConfig());
+        return refactoredCompilationUnit.toString(MJGAPrinterConfig.getConfig());
     }
 
     public String refactorSnippet(CompilationUnit compilationUnit, Range range) {
@@ -61,13 +62,14 @@ public class MJGATextDocumentService implements TextDocumentService {
         Node loopNode = loopNodeOptional.get();
         String className = loopNode.getClass().toString();
 
+        CompilationUnit refactoredCompilationUnit = compilationUnit;
         if (className.equals(ForStmt.class.toString())) {
-            compilationUnit = new ForLoopRefactoringPattern().refactor(loopNode, compilationUnit);
+            refactoredCompilationUnit = new ForLoopRefactoringPattern().refactor(loopNode, compilationUnit);
         } else if (className.equals(ForEachStmt.class.toString())) {
-            compilationUnit = new ForEachRefactoringPattern().refactor(loopNode, compilationUnit);
+            refactoredCompilationUnit = new ForEachRefactoringPattern().refactor(loopNode, compilationUnit);
         }
 
-        return compilationUnit.toString(MJGAPrinterConfig.getConfig());
+        return refactoredCompilationUnit.toString(MJGAPrinterConfig.getConfig());
     }
 
     public void showRefactorableCode(CompilationUnit compilationUnit, String filePath) {
@@ -236,7 +238,9 @@ public class MJGATextDocumentService implements TextDocumentService {
     }
 
     @Override
-    public void didClose(DidCloseTextDocumentParams didCloseTextDocumentParams) { }
+    public void didClose(DidCloseTextDocumentParams didCloseTextDocumentParams) {
+        LOGGER.info(didCloseTextDocumentParams.toString());
+    }
 
     @Override
     public void didSave(DidSaveTextDocumentParams didSaveTextDocumentParams) {

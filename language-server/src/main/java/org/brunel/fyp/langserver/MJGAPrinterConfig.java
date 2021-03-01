@@ -5,7 +5,7 @@ import com.github.javaparser.printer.configuration.DefaultConfigurationOption;
 import com.github.javaparser.printer.configuration.DefaultPrinterConfiguration;
 import com.github.javaparser.printer.configuration.PrinterConfiguration;
 
-public final class MJGAPrinterConfig {
+public class MJGAPrinterConfig {
     private static DefaultPrettyPrinter INSTANCE;
 
     public static PrinterConfiguration getConfig() {
