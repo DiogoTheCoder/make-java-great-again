@@ -11,9 +11,7 @@
 
 _Make Java Great Again! Refactoring to Functional_, is a dissertation-based project supervised by [@BrunelCS](https://github.com/BrunelCS) and [Dr Rumyana Neykova](https://www.brunel.ac.uk/people/rumyana-neykova), who's sole aim is to increase the usage of functional paradigms in Java and developer's confidence in using these paradigms.
 
-<br />
-<br />
-<br />
+<br /><br /><br /><br />
 
 ## Features
 
