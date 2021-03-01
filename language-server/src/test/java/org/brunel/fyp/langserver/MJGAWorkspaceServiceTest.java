@@ -19,13 +19,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-class MJGAWorkspaceServiceTest {
+class MJGAWorkspaceServiceTest extends AbstractTest {
 
     private MJGAWorkspaceService mjgaWorkspaceService;
 
     @BeforeEach
     void setUp() {
         this.mjgaWorkspaceService = MJGALanguageServer.getInstance().getWorkspaceService();
+        this.mjgaWorkspaceService.didChangeConfiguration(this.getWorkspaceConfig());
     }
 
     @Test
@@ -58,6 +59,7 @@ class MJGAWorkspaceServiceTest {
                 // Now let's check both before and after refactor methods have the same code!
                 assertEquals(afterRefactorMethod.getBody().get().toString(), beforeRefactorMethod.getBody().get().toString());
             } catch (Throwable e) {
+                System.out.println("Test file: " + file.getName());
                 fail(e);
             }
         });

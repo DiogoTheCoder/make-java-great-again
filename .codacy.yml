@@ -1,0 +1,8 @@
+---
+exclude_paths:
+  - "**/*.md"
+  - "**/*.log"
+  - "src/test/suite/java/**/*"
+  - "language-server/src/test/resources/**/*"
+  - "examples/**/*"
+  - "**.min.js"
