@@ -15,7 +15,6 @@ import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.ast.stmt.Statement;
-import org.brunel.fyp.langserver.MJGALanguageServer;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
