@@ -1,7 +1,6 @@
 <img align="left" width="33%" src="https://raw.githubusercontent.com/DiogoTheCoder/make-java-great-again/master/MJGA.png" alt="Make Java Great Again Logo">
 
-
-<div style="text-align:center">
+<div>
     <img src="https://circleci.com/gh/DiogoTheCoder/make-java-great-again.svg?style=svg" alt="CircleCI Badge" />
     <img src="https://dev.azure.com/DiogoTheCoder/Make%20Java%20Great%20Again/_apis/build/status/DiogoTheCoder.make-java-great-again?branchName=master" alt="Azure Build" />
     <img src="https://app.codacy.com/project/badge/Grade/1eb2d5878dd44a12a8a12d7e9fce3e38" alt="Codacy Badge" />
@@ -15,14 +14,13 @@ _Make Java Great Again! Refactoring to Functional_, is a dissertation-based proj
 <br />
 <br />
 <br />
-<br />
 
 ## Features
 
 Currently, this VS Code extension provides code highlighting, quick fixing and refactoring for the following patterns:
-* forEach
-* map
-* reduce
+*  forEach
+*  map
+*  reduce
 
 > Code Highlighting
 > 
@@ -48,6 +46,6 @@ Please ensure you are running Java 8, since this was when functional pardadigms 
 
 ### For more information
 
-* 👨‍🏫 [Presentation](https://docs.google.com/presentation/d/1_jPc1FcllnkuTHoz4-MZNqDyj8vIujrTlvCh0h7rGds/edit?usp=sharing)
+*  👨‍🏫 [Presentation](https://docs.google.com/presentation/d/1_jPc1FcllnkuTHoz4-MZNqDyj8vIujrTlvCh0h7rGds/edit?usp=sharing)
 
 **Enjoy!**

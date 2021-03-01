@@ -10,17 +10,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
-import java.nio.file.FileSystems;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class MJGAWorkspaceServiceTest {
 
-    MJGAWorkspaceService mjgaWorkspaceService;
+    private MJGAWorkspaceService mjgaWorkspaceService;
 
     @BeforeEach
     void setUp() {

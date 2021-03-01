@@ -9,7 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 abstract public class AbstractTest {
-    final String YYYY_MM_DD = "yyyy-MM-dd";
+    private final String YYYY_MM_DD = "yyyy-MM-dd";
 
     public String getLogFilePath() {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(YYYY_MM_DD);

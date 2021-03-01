@@ -25,10 +25,10 @@ public class ForLoopRefactoringPattern implements MJGARefactoringPattern {
     private NameExpr arrayName;
 
     // forEach Variables
-    Expression updateExpr;
-    String elementVariable;
-    String startingIndex;
-    String endingIndex;
+    private Expression updateExpr;
+    private String elementVariable;
+    private String startingIndex;
+    private String endingIndex;
 
     @Override
     public CompilationUnit refactor(Node node, CompilationUnit compilationUnit) {

@@ -5,7 +5,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javaparser.ast.CompilationUnit;
 import org.brunel.fyp.langserver.commands.Commands;
-import org.eclipse.lsp4j.*;
+import org.eclipse.lsp4j.DidChangeConfigurationParams;
+import org.eclipse.lsp4j.DidChangeWatchedFilesParams;
+import org.eclipse.lsp4j.ExecuteCommandParams;
+import org.eclipse.lsp4j.SymbolInformation;
+import org.eclipse.lsp4j.WorkspaceSymbolParams;
 import org.eclipse.lsp4j.services.WorkspaceService;
 
 import java.io.IOException;
@@ -62,7 +66,7 @@ public class MJGAWorkspaceService implements WorkspaceService {
 
     @Override
     public void didChangeWatchedFiles(DidChangeWatchedFilesParams didChangeWatchedFilesParams) {
-
+        LOGGER.info(didChangeWatchedFilesParams.toString());
     }
 
     public JsonNode getConfigurationSettings() {

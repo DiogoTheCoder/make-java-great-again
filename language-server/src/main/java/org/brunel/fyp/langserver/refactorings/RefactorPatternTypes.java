@@ -13,8 +13,8 @@ public enum RefactorPatternTypes {
                 return "map";
             case REDUCE:
                 return "reduce";
+            default:
+                return "";
         }
-
-        return "";
     }
 }
