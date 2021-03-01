@@ -1,8 +1,5 @@
 package org.brunel.fyp.langserver.refactorings;
 
-import java.util.LinkedHashMap;
-import java.util.Optional;
-
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
@@ -13,11 +10,17 @@ import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.IntegerLiteralExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
-import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.expr.UnaryExpr.Operator;
+import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.ast.stmt.Statement;
+import org.brunel.fyp.langserver.MJGALanguageServer;
+
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
 
 public class ForLoopRefactoringPattern implements MJGARefactoringPattern {
     // Map Variables
@@ -60,20 +63,18 @@ public class ForLoopRefactoringPattern implements MJGARefactoringPattern {
             return null;
         }
 
-        String mapFunction = "";
+        Map<String, String> methodToMethodRefMap = this.getMethodToMethodReferenceMap();
+        Optional<String> methodKey = methodToMethodRefMap.keySet()
+                .stream()
+                .filter(key -> expressionStmtMethodCall.toString().contains(key))
+                .findFirst();
 
-        // Build something like this: "array =
-        // array.stream().map(String::toUpperCase).collect(Collectors.toList())"
-        if (expressionStmtMethodCall.toString().contains(".toUpperCase()")) {
-            // We are trying to uppercase the elements of the list
-            mapFunction = "String::toUpperCase";
-        } else if (expressionStmtMethodCall.toString().contains(".toLowerCase()")) {
-            // We are trying to lowercase the elements of the list
-            mapFunction = "String::toLowerCase";
+        if (!methodKey.isPresent()) {
+            return null;
         }
 
         String template = String.format("%s = %s.stream().map(%s).collect(Collectors.toList())",
-                this.arrayName.toString(), this.arrayName.toString(), mapFunction);
+                this.arrayName.toString(), this.arrayName.toString(), methodToMethodRefMap.get(methodKey.get()));
 
         Expression templateExpression = StaticJavaParser.parseExpression(template);
         replacingExpressionStmt.setExpression(templateExpression);
@@ -113,6 +114,16 @@ public class ForLoopRefactoringPattern implements MJGARefactoringPattern {
             }
 
             this.expressionStmtMethodCall = (MethodCallExpr) expressionStmtMethodCallOptional.get();
+
+            Map<String, String> methodToMethodRefMap = this.getMethodToMethodReferenceMap();
+            Optional<String> methodKey = methodToMethodRefMap.keySet()
+                    .stream()
+                    .filter(key -> expressionStmtMethodCall.toString().contains(key))
+                    .findFirst();
+
+            if (!methodKey.isPresent()) {
+                return false;
+            }
 
             // We ain't trying to set anything, don't use map therefore
             return this.expressionStmtMethodCall.getName().toString().equals("set");
@@ -204,7 +215,7 @@ public class ForLoopRefactoringPattern implements MJGARefactoringPattern {
             return false;
         }
 
-        // Right side of the comparsion usually has the end index
+        // Right side of the comparison usually has the end index
         this.endingIndex = compareOptional.get().asBinaryExpr().getRight().toString();
 
         Optional<Expression> updateOptional = forStmt.getUpdate().getFirst();
@@ -218,5 +229,12 @@ public class ForLoopRefactoringPattern implements MJGARefactoringPattern {
         return true;
     }
 
+    private HashMap<String, String> getMethodToMethodReferenceMap() {
+        // TODO: support more method references
+        return new HashMap<String, String>() {{
+            put("toUpperCase", "String::toUpperCase");
+            put("toLowerCase", "String::toLowerCase");
+        }};
+    }
 
 }

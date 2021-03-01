@@ -3,7 +3,7 @@ package org.brunel.fyp.langserver;
 import java.util.Arrays;
 import java.util.List;
 
-public class ForEachToFunctional {
+public class ForEachArrayToFunctional {
     public static void refactorThis() {
         List<String> names = Arrays.asList("Diogo", "Costa");
 
