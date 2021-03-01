@@ -43,6 +43,7 @@
     </build>
     <properties>
         <lsp4j.version>0.10.0</lsp4j.version>
+        <java-parser.version>3.19.0</java-parser.version>
         <surefire.version>2.22.2</surefire.version>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
