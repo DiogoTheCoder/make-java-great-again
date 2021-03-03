@@ -2,11 +2,15 @@
   "name": "make-java-great-again",
   "displayName": "Make Java Great Again!",
   "publisher": "DiogoTheCoder",
-  "description": "",
+  "description": "Make Java Great Again! Refactoring to Functional, is a dissertation-based project supervised by @BrunelCS and Dr Rumyana Neykova, who's sole aim is to increase the usage of functional paradigms in Java and developer's confidence in using these paradigms.",
   "version": "0.0.1",
   "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/DiogoTheCoder/make-java-great-again.git"
+  },
   "engines": {
-    "vscode": "^1.50.0"
+    "vscode": "^1.53.0"
   },
   "categories": [
     "Other"

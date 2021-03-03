@@ -4,7 +4,7 @@
     <img src="https://circleci.com/gh/DiogoTheCoder/make-java-great-again.svg?style=svg" alt="CircleCI Badge" />
     <img src="https://dev.azure.com/DiogoTheCoder/Make%20Java%20Great%20Again/_apis/build/status/DiogoTheCoder.make-java-great-again?branchName=master" alt="Azure Build" />
     <img src="https://app.codacy.com/project/badge/Grade/1eb2d5878dd44a12a8a12d7e9fce3e38" alt="Codacy Badge" />
-    <img src="https://aoindustries.com/ao-badges/java-8.svg" alt="java: &gt;= 8" />
+    <img src="https://raw.githubusercontent.com/DiogoTheCoder/make-java-great-again/master/java8+.png" alt="java: &gt;= 8" />
 </div>
 
 <br />
@@ -22,15 +22,15 @@ Currently, this VS Code extension provides code highlighting, quick fixing and r
 
 > Code Highlighting
 > 
-> ![Code Highlighting](examples/foreach-codehighlight.png)
+> ![Code Highlighting](https://raw.githubusercontent.com/DiogoTheCoder/make-java-great-again/master/examples/foreach-codehighlight.png)
 
 > Quick Fix
 > 
-> ![Quick Fix](examples/foreach-quickfix.png)
+> ![Quick Fix](https://github.com/DiogoTheCoder/make-java-great-again/blob/master/examples/foreach-quickfix.png?raw=true)
 
 > Refactor Entire File
 >
-> ![Refactor](examples/reduce-refactorfile.gif)
+> ![Refactor](https://github.com/DiogoTheCoder/make-java-great-again/blob/master/examples/reduce-refactorfile.gif?raw=true)
 
 ## Contributing
 
