@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.printer.DotPrinter;
 import org.brunel.fyp.langserver.commands.Commands;
 import org.eclipse.lsp4j.DidChangeConfigurationParams;
 import org.eclipse.lsp4j.DidChangeWatchedFilesParams;
@@ -26,10 +27,14 @@ public class MJGAWorkspaceService implements WorkspaceService {
     public CompletableFuture<Object> executeCommand(ExecuteCommandParams params) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                if (params.getCommand().equals(Commands.REFACTOR_FILE)) {
-                    String fileUri = params.getArguments().get(0).toString();
-                    CompilationUnit compilationUnit = this.parseFile(fileUri);
+                String fileUri = params.getArguments().get(0).toString();
+                CompilationUnit compilationUnit = this.parseFile(fileUri);
+                String command = params.getCommand();
+                if (command.equals(Commands.REFACTOR_FILE)) {
                     return MJGALanguageServer.getInstance().getTextDocumentService().refactor(compilationUnit);
+                } else if (command.equals(Commands.GENERATE_DOT_AST)) {
+                    DotPrinter dotPrinter = new DotPrinter(false);
+                    return dotPrinter.output(compilationUnit);
                 }
             } catch (Throwable e) {
                 LOGGER.log(Level.SEVERE, e.getMessage());
