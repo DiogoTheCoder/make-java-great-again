@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
+import com.github.javaparser.printer.DotPrinter;
 import com.github.javaparser.serialization.JavaParserJsonSerializer;
 import org.brunel.fyp.langserver.commands.Commands;
 import org.eclipse.lsp4j.DidChangeConfigurationParams;
@@ -38,8 +39,9 @@ public class MJGAWorkspaceService implements WorkspaceService {
                 String command = params.getCommand();
                 if (command.equals(Commands.REFACTOR_FILE)) {
                     return MJGALanguageServer.getInstance().getTextDocumentService().refactor(compilationUnit);
-                } else if (command.equals(Commands.GENERATE_JSON_AST)) {
-                    return this.serialise(compilationUnit);
+                } else if (command.equals(Commands.GENERATE_DOT_AST)) {
+                    DotPrinter dotPrinter = new DotPrinter(true);
+                    return dotPrinter.output(compilationUnit);
                 }
             } catch (Throwable e) {
                 LOGGER.log(Level.SEVERE, e.getMessage());
