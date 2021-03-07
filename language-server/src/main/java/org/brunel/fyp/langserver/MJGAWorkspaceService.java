@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Node;
+import com.github.javaparser.serialization.JavaParserJsonSerializer;
 import org.brunel.fyp.langserver.commands.Commands;
 import org.eclipse.lsp4j.DidChangeConfigurationParams;
 import org.eclipse.lsp4j.DidChangeWatchedFilesParams;
@@ -12,7 +14,12 @@ import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.WorkspaceSymbolParams;
 import org.eclipse.lsp4j.services.WorkspaceService;
 
+import javax.json.Json;
+import javax.json.stream.JsonGenerator;
+import javax.json.stream.JsonGeneratorFactory;
 import java.io.IOException;
+import java.io.StringWriter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
@@ -26,10 +33,13 @@ public class MJGAWorkspaceService implements WorkspaceService {
     public CompletableFuture<Object> executeCommand(ExecuteCommandParams params) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                if (params.getCommand().equals(Commands.REFACTOR_FILE)) {
-                    String fileUri = params.getArguments().get(0).toString();
-                    CompilationUnit compilationUnit = this.parseFile(fileUri);
+                String fileUri = params.getArguments().get(0).toString();
+                CompilationUnit compilationUnit = this.parseFile(fileUri);
+                String command = params.getCommand();
+                if (command.equals(Commands.REFACTOR_FILE)) {
                     return MJGALanguageServer.getInstance().getTextDocumentService().refactor(compilationUnit);
+                } else if (command.equals(Commands.GENERATE_JSON_AST)) {
+                    return this.serialise(compilationUnit);
                 }
             } catch (Throwable e) {
                 LOGGER.log(Level.SEVERE, e.getMessage());
@@ -38,6 +48,17 @@ public class MJGAWorkspaceService implements WorkspaceService {
 
             throw new UnsupportedOperationException();
         });
+    }
+
+    private String serialise(Node node) {
+        JsonGeneratorFactory generatorFactory = Json.createGeneratorFactory(new HashMap<>());
+        JavaParserJsonSerializer serializer = new JavaParserJsonSerializer();
+        StringWriter jsonWriter = new StringWriter();
+        try (JsonGenerator generator = generatorFactory.createGenerator(jsonWriter)) {
+            serializer.serialize(node, generator);
+        }
+
+        return jsonWriter.toString();
     }
 
     private CompilationUnit parseFile(String fileUri) throws IOException {
