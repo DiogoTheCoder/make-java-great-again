@@ -91,6 +91,11 @@
     "configuration": {
       "title": "Make Java Great Again",
       "properties": {
+        "java.abstractSyntaxTree.showNodeType": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show Node Types in Abstract Syntax Tree"
+        },
         "java.refactor.reduce.operators": {
           "type": "array",
           "markdownDescription": "The operators used by the Language Server to help determine whether or not to refactor to *Reduce*.\n\nSupported:\n\nASSIGN: **=**, PLUS: **+=**, MINUS: **-=**, MULTIPLY: ***=**, DIVIDE: **/=**, REMAINDER: **%=**\n\nBINARY_AND: **&=**, BINARY_OR: **|=**, XOR: **^=**\n\nLEFT_SHIFT: **&lt;&lt;=**, SIGNED_RIGHT_SHIFT: **>>=**, UNSIGNED_RIGHT_SHIFT: **>>>=**\n\n",

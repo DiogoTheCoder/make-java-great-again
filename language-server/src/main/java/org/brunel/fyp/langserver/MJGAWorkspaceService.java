@@ -33,7 +33,8 @@ public class MJGAWorkspaceService implements WorkspaceService {
                 if (command.equals(Commands.REFACTOR_FILE)) {
                     return MJGALanguageServer.getInstance().getTextDocumentService().refactor(compilationUnit);
                 } else if (command.equals(Commands.GENERATE_DOT_AST)) {
-                    DotPrinter dotPrinter = new DotPrinter(false);
+                    boolean outputNodeType = Boolean.parseBoolean(configurationSettings.get("abstractSyntaxTree").get("showNodeType").toString());
+                    DotPrinter dotPrinter = new DotPrinter(outputNodeType);
                     return dotPrinter.output(compilationUnit);
                 }
             } catch (Throwable e) {
