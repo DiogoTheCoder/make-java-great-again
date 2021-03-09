@@ -34,3 +34,7 @@ export function writeCode(code: string): void {
 
   vscode.workspace.applyEdit(edit);
 }
+
+export function getActiveDocumentFilePath(): string {
+  return getEditor().document.fileName;
+}

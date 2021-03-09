@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
-import { getEditor } from '../utils';
+import { getActiveDocumentFilePath, getEditor } from '../utils';
 
-export async function displaySyntaxTree(): Promise<void> {
+export async function displaySyntaxTree(): Promise<vscode.WebviewPanel> {
   const editor = getEditor();
 
   const dotAst: string =
@@ -11,18 +11,12 @@ export async function displaySyntaxTree(): Promise<void> {
     )) ?? '';
 
   if (dotAst.length === 0) {
-    vscode.window.showInformationMessage('Error!');
-    return;
+    throw new Error('Unable to generate AST');
   }
-
-  // Get the last part of the filename (after the last slash), e.g. Refactor.java
-  const filename = editor.document.fileName.substring(
-    editor.document.fileName.lastIndexOf('/') + 1,
-  );
 
   const panel = vscode.window.createWebviewPanel(
     'syntaxTreeGraph',
-    `${filename} - Simple Abstract Syntax Tree`,
+    `${getActiveDocumentFilePath()} - Simple Abstract Syntax Tree`,
     vscode.ViewColumn.One,
     {
       enableScripts: true,
@@ -32,6 +26,8 @@ export async function displaySyntaxTree(): Promise<void> {
   // And set its HTML content
   const html = getWebviewContent(dotAst);
   panel.webview.html = html;
+
+  return panel;
 }
 
 function getWebviewContent(treeData: string) {
