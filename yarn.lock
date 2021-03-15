@@ -903,13 +903,13 @@ isexe@^2.0.0:
   resolved "https://registry.yarnpkg.com/isexe/-/isexe-2.0.0.tgz#e8fbf374dc556ff8947a10dcb0572d633f2cfa10"
   integrity sha1-6PvzdNxVb/iUehDcsFctYz8s+hA=
 
-java-parser@1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/java-parser/-/java-parser-1.0.0.tgz#129131eba90b64e3cebca56a027649fe657e78a1"
-  integrity sha512-z+1shDR4S1uC/v44uITWV87kP+PtaBT7dnZgmwZcAUhnA0wldJSlA6KhGHU8IXJHaLKtjgYPbSxvmWVaMbtM6g==
+java-parser@1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/java-parser/-/java-parser-1.0.2.tgz#c466dcdb022f49474a5f124a5c8a282c8a1b9663"
+  integrity sha512-lBXc+F62ds2W83eH5MwGnzuWdb6kgGBV0x0R7w0B4JKGDrJzolMUEhRMzzzlIX68HvRU7XtfPon22YaB+dVg+A==
   dependencies:
     chevrotain "6.5.0"
-    lodash "4.17.20"
+    lodash "4.17.21"
 
 js-tokens@^4.0.0:
   version "4.0.0"
@@ -961,12 +961,7 @@ locate-path@^6.0.0:
   dependencies:
     p-locate "^5.0.0"
 
-lodash@4.17.20:
-  version "4.17.20"
-  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.20.tgz#b44a9b6297bcb698f1c51a3545a2b3b368d59c52"
-  integrity sha512-PlhdFcillOINfeV7Ni6oF1TAEayyZBoZ8bcshTHqOYJYlrqzRK5hagpagky5o4HfCzzd1TRkXPMFq6cKk9rGmA==
-
-lodash@^4.17.15, lodash@^4.17.20, lodash@^4.17.21:
+lodash@4.17.21, lodash@^4.17.15, lodash@^4.17.20, lodash@^4.17.21:
   version "4.17.21"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
   integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
@@ -1150,13 +1145,13 @@ prettier-linter-helpers@^1.0.0:
   dependencies:
     fast-diff "^1.1.2"
 
-prettier-plugin-java@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/prettier-plugin-java/-/prettier-plugin-java-1.0.1.tgz#aab742e1a1cc3f822cb87b7df22ca6b317bddbf7"
-  integrity sha512-QaNLrBra0pzSba29cq7N5JPqHPlEM+3FRp17ViL66fKcStu+5mDOS+YV99mbkpHTrsMAuChW3rZ85ZDs4Smupw==
+prettier-plugin-java@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/prettier-plugin-java/-/prettier-plugin-java-1.0.2.tgz#2833529708a47d4a69ce236546df20a84cde4344"
+  integrity sha512-YgcN1WGZlrH0E+bHdqtIYtfDp6k2PHBnIaGjzdff/7t/NyDWAA6ypAmnD7YQVG2OuoIaXYkC37HN7cz68lLWLg==
   dependencies:
-    java-parser "1.0.0"
-    lodash "4.17.20"
+    java-parser "1.0.2"
+    lodash "4.17.21"
     prettier "2.2.1"
 
 prettier@2.2.1, prettier@^2.2.1:
