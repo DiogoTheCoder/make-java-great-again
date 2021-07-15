@@ -16,7 +16,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.7.1</version>
+            <version>5.7.2</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -43,7 +43,7 @@
     </build>
     <properties>
         <lsp4j.version>0.11.0</lsp4j.version>
-        <java-parser.version>3.20.0</java-parser.version>
+        <java-parser.version>3.20.2</java-parser.version>
         <surefire.version>2.22.2</surefire.version>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
