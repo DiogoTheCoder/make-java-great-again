@@ -45,7 +45,7 @@
     "vscode-test": "^1.6.1"
   },
   "dependencies": {
-    "prettier": "^2.2.1",
+    "prettier": "^2.3.2",
     "prettier-plugin-java": "^1.3.0",
     "vscode-languageclient": "6.1.3"
   },
