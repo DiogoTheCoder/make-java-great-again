@@ -31,7 +31,7 @@
     "@types/glob": "^7.1.4",
     "@types/mocha": "^9.0.0",
     "@types/node": "^16.10.2",
-    "@types/prettier": "^2.3.2",
+    "@types/prettier": "^2.6.0",
     "@types/vscode": "^1.59.0",
     "@typescript-eslint/eslint-plugin": "^4.30.0",
     "@typescript-eslint/parser": "^4.32.0",
