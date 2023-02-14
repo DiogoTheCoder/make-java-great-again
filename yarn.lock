@@ -111,10 +111,10 @@
   resolved "https://registry.yarnpkg.com/@types/prettier/-/prettier-2.3.2.tgz#fc8c2825e4ed2142473b4a81064e6e081463d1b3"
   integrity sha512-eI5Yrz3Qv4KPUa/nSIAi0h+qX0XyewOliug5F2QAtuRg6Kjg6jfmxe1GIwoIRhZspD1A0RP8ANrPwvEXXtRFog==
 
-"@types/vscode@^1.59.0":
-  version "1.59.0"
-  resolved "https://registry.yarnpkg.com/@types/vscode/-/vscode-1.59.0.tgz#11c93f5016926126bf30b47b9ece3bd617eeef31"
-  integrity sha512-Zg38rusx2nU6gy6QdF7v4iqgxNfxzlBlDhrRCjOiPQp+sfaNrp3f9J6OHIhpGNN1oOAca4+9Hq0+8u3jwzPMlQ==
+"@types/vscode@^1.75.1":
+  version "1.75.1"
+  resolved "https://registry.yarnpkg.com/@types/vscode/-/vscode-1.75.1.tgz#21d16480c04a50a1ceb693ea7577c58f88301579"
+  integrity sha512-emg7wdsTFzdi+elvoyoA+Q8keEautdQHyY5LNmHVM4PTpY8JgOTVADrGVyXGepJ6dVW2OS5/xnLUWh+nZxvdiA==
 
 "@typescript-eslint/eslint-plugin@^4.30.0":
   version "4.30.0"
